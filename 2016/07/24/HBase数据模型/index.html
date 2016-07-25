@@ -68,7 +68,7 @@
 <link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="Hexo, NexT" />
+  <meta name="keywords" content="HBase," />
 
 
 
@@ -84,15 +84,22 @@
 
 
 
-<meta name="description" content="Welcome~">
-<meta property="og:type" content="website">
-<meta property="og:title" content="RNA">
-<meta property="og:url" content="http://yoursite.com/archives/index.html">
+<meta name="description" content="我觉得关于HBase、Bigtable数据模型的最好阐述来源于论文《Bigtable: A Distributed Storage System for Structured Data》section2 Data Model:
+
+A Bigtable is a sparse, distributed, persistent multidimensional sorted map.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="HBase数据模型">
+<meta property="og:url" content="http://yoursite.com/2016/07/24/HBase数据模型/index.html">
 <meta property="og:site_name" content="RNA">
-<meta property="og:description" content="Welcome~">
+<meta property="og:description" content="我觉得关于HBase、Bigtable数据模型的最好阐述来源于论文《Bigtable: A Distributed Storage System for Structured Data》section2 Data Model:
+
+A Bigtable is a sparse, distributed, persistent multidimensional sorted map.">
+<meta property="og:updated_time" content="2016-07-25T15:44:13.862Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="RNA">
-<meta name="twitter:description" content="Welcome~">
+<meta name="twitter:title" content="HBase数据模型">
+<meta name="twitter:description" content="我觉得关于HBase、Bigtable数据模型的最好阐述来源于论文《Bigtable: A Distributed Storage System for Structured Data》section2 Data Model:
+
+A Bigtable is a sparse, distributed, persistent multidimensional sorted map.">
 
 
 
@@ -113,9 +120,9 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/archives/"/>
+  <link rel="canonical" href="http://yoursite.com/2016/07/24/HBase数据模型/"/>
 
-  <title> 归档 | RNA </title>
+  <title> HBase数据模型 | RNA </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -136,7 +143,7 @@
     
   
 
-  <div class="container one-collumn sidebar-position-left  page-archive  ">
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -214,214 +221,152 @@
           <div id="content" class="content">
             
 
-  <section id="posts" class="posts-collapse">
-    <span class="archive-move-on"></span>
-
-    <span class="archive-page-counter">
-      
-      
-      
-        
-      
-      嗯..! 目前共计 5 篇日志。 继续努力。
-    </span>
-
+  <div id="posts" class="posts-expand">
     
-
-      
-      
-      
-
-      
-        
-        <div class="collection-title">
-          <h2 class="archive-year motion-element" id="archive-year-2016">2016</h2>
-        </div>
-      
-      
-
-      
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h1 class="post-title">
-        
-            <a class="post-title-link" href="/2016/07/24/HBase-Client端批量处理操作分析/" itemprop="url">
-              
-                <span itemprop="name">HBase Client端批量处理操作分析</span>
-              
-            </a>
-        
-      </h1>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2016-07-24T18:29:50+08:00"
-              content="2016-07-24" >
-          07-24
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-
-    
-
-      
-      
-      
-
-      
-      
-
-      
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h1 class="post-title">
-        
-            <a class="post-title-link" href="/2016/07/24/HBase-Region定位/" itemprop="url">
-              
-                <span itemprop="name">HBase Region定位</span>
-              
-            </a>
-        
-      </h1>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2016-07-24T16:22:33+08:00"
-              content="2016-07-24" >
-          07-24
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-
-    
-
-      
-      
-      
-
-      
-      
-
-      
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h1 class="post-title">
-        
-            <a class="post-title-link" href="/2016/07/24/HBase总体架构/" itemprop="url">
-              
-                <span itemprop="name">HBase总体架构</span>
-              
-            </a>
-        
-      </h1>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2016-07-24T15:01:21+08:00"
-              content="2016-07-24" >
-          07-24
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-
-    
-
-      
-      
-      
-
-      
-      
-
-      
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h1 class="post-title">
-        
-            <a class="post-title-link" href="/2016/07/24/HBase概念视图与物理视图/" itemprop="url">
-              
-                <span itemprop="name">HBase概念视图与物理视图</span>
-              
-            </a>
-        
-      </h1>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2016-07-24T14:34:27+08:00"
-              content="2016-07-24" >
-          07-24
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-
-    
-
-      
-      
-      
-
-      
-      
-
-      
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h1 class="post-title">
-        
-            <a class="post-title-link" href="/2016/07/24/HBase数据模型/" itemprop="url">
-              
-                <span itemprop="name">HBase数据模型</span>
-              
-            </a>
-        
-      </h1>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2016-07-24T13:45:55+08:00"
-              content="2016-07-24" >
-          07-24
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-
-    
-
-  </section>
 
   
+  
 
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                HBase数据模型
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-07-24T13:45:55+08:00" content="2016-07-24">
+              2016-07-24
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/HBase/" itemprop="url" rel="index">
+                    <span itemprop="name">HBase</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>　　我觉得关于HBase、Bigtable数据模型的最好阐述来源于论文《<em>Bigtable: A Distributed Storage System for Structured Data</em>》section2 Data Model:</p>
+<blockquote>
+<p>A Bigtable is a sparse, distributed, persistent multidimensional sorted map.
+　　</p>
+</blockquote>
+<p>　　关键词:<strong><em>sparse distributed persistent multi-dimensional sorted map</em></strong><br>　　以上几个关键词的详细阐述可参考博客<a href="http://jimbojw.com/wiki/index.php?title=Understanding_Hbase_and_BigTable" target="_blank" rel="external">Understanting HBase and BigTable</a>。<br>　　Bigtable论文继续阐述:</p>
+<blockquote>
+<p>The map is indexed by a row key, column key, and a timestamp; each value in the map is an uninterpreted array of bytes.</p>
+<p>(row:string,column:string,time:int64) -&gt; string</p>
+</blockquote>
+<p>　　HBase使用的数据模型与Bigtable类似。<br>　　了解了HBase、Bigtable的数据模型，再去看HBase的概念图与物理视图，便能很好地理解。</p>
+<p>　　参考:<br>　　<em>Bigtable: A Distributed Storage System for Structured Data</em><br>　　<a href="http://jimbojw.com/wiki/index.php?title=Understanding_Hbase_and_BigTable" target="_blank" rel="external">Understanting HBase and BigTable</a><br>　　<a href="http://hbase.apache.org/book.html#datamodel" target="_blank" rel="external">HBase官方文档，Data Model部分</a></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/HBase/" rel="tag">#HBase</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/07/24/HBase概念视图与物理视图/" rel="prev" title="HBase概念视图与物理视图">
+                HBase概念视图与物理视图 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
 
 
           </div>
@@ -429,6 +374,10 @@
 
 
           
+  <div class="comments" id="comments">
+    
+  </div>
+
 
         </div>
         
@@ -448,8 +397,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview sidebar-panel  sidebar-panel-active ">
+      <section class="site-overview sidebar-panel ">
         <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
           <img class="site-author-image" itemprop="image"
                src="/uploads/images/jfm1.jpg"
@@ -499,6 +457,17 @@
 
       </section>
 
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <p class="post-toc-empty">此文章未包含目录</p>
+            
+          </div>
+        </section>
       
 
     </div>
@@ -595,11 +564,9 @@
   
 
   
-  
-    <script type="text/javascript" id="motion.page.archive">
-      $('.archive-year').velocity('transition.slideLeftIn');
-    </script>
-  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
 
 
   

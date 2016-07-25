@@ -5,7 +5,7 @@
   
 
 
-<html class="theme-next muse use-motion">
+<html class="theme-next mist use-motion">
 <head>
   <meta charset="UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
@@ -84,25 +84,28 @@
 
 
 
+<meta name="description" content="Welcome~">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Hexo">
+<meta property="og:title" content="RNA">
 <meta property="og:url" content="http://yoursite.com/index.html">
-<meta property="og:site_name" content="Hexo">
+<meta property="og:site_name" content="RNA">
+<meta property="og:description" content="Welcome~">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Hexo">
+<meta name="twitter:title" content="RNA">
+<meta name="twitter:description" content="Welcome~">
 
 
 
 <script type="text/javascript" id="hexo.configuration">
   var NexT = window.NexT || {};
   var CONFIG = {
-    scheme: 'Muse',
+    scheme: 'Mist',
     sidebar: {"position":"left","display":"post"},
     fancybox: true,
     motion: true,
     duoshuo: {
       userId: 0,
-      author: 'Author'
+      author: '博主'
     }
   };
 </script>
@@ -112,10 +115,10 @@
 
   <link rel="canonical" href="http://yoursite.com/"/>
 
-  <title> Hexo </title>
+  <title> RNA </title>
 </head>
 
-<body itemscope itemtype="http://schema.org/WebPage" lang="">
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
 
   
 
@@ -145,7 +148,7 @@
   <div class="custom-logo-site-title">
     <a href="/"  class="brand" rel="start">
       <span class="logo-line-before"><i></i></span>
-      <span class="site-title">Hexo</span>
+      <span class="site-title">RNA</span>
       <span class="logo-line-after"><i></i></span>
     </a>
   </div>
@@ -172,7 +175,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
             
-            Startseite
+            首页
           </a>
         </li>
       
@@ -182,7 +185,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
             
-            Archiv
+            归档
           </a>
         </li>
       
@@ -192,7 +195,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
             
-            Tags
+            标签
           </a>
         </li>
       
@@ -235,8 +238,8 @@
             
               
                 
-                <a class="post-title-link" href="/2016/07/16/hello-world/" itemprop="url">
-                  Hello World
+                <a class="post-title-link" href="/2016/07/24/HBase-Client端批量处理操作分析/" itemprop="url">
+                  HBase Client端批量处理操作分析
                 </a>
               
             
@@ -248,12 +251,43 @@
             <span class="post-meta-item-icon">
               <i class="fa fa-calendar-o"></i>
             </span>
-            <span class="post-meta-item-text">Veröffentlicht am</span>
-            <time itemprop="dateCreated" datetime="2016-07-16T11:14:02+08:00" content="2016-07-16">
-              2016-07-16
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-07-24T18:29:50+08:00" content="2016-07-24">
+              2016-07-24
             </time>
           </span>
 
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/HBase/" itemprop="url" rel="index">
+                    <span itemprop="name">HBase</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/HBase/源码分析/" itemprop="url" rel="index">
+                    <span itemprop="name">源码分析</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
           
 
           
@@ -279,15 +313,526 @@
       
         
           
-            <p>Welcome to <a href="https://hexo.io/" target="_blank" rel="external">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="external">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="external">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="external">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo new <span class="string">"My New Post"</span></div></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="external">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo server</div></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="external">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo generate</div></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="external">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo deploy</div></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/deployment.html" target="_blank" rel="external">Deployment</a></p>
+            <h2 id="为什么需要批量处理操作"><a href="#为什么需要批量处理操作" class="headerlink" title="为什么需要批量处理操作"></a>为什么需要批量处理操作</h2><p>　　HTable的get(Get get),delete(Delete delete),put(Put put)都是单个操作。<strong>每个Get/Put/Delete实际上都是一个RPC操作。</strong><br>　　当一个应用程序需要进行大量Get/Put/Delete操作，比如：需要不断向服务器put数据。这时候可以通过<strong>将多个数据通过一次RPC操作，提交给服务器，将减少RPC请求</strong>，这样可以大大提高性能。</p>
+<h2 id="有哪些批处理操作"><a href="#有哪些批处理操作" class="headerlink" title="有哪些批处理操作"></a>有哪些批处理操作</h2><p>HBase提供了一下批处理操作：<br>Get、Put、Delete都实现了Row接口。</p>
+<h2 id="源码分析"><a href="#源码分析" class="headerlink" title="源码分析"></a>源码分析</h2><p>get(List<get> gets&gt;底层调用了batch(List)<br>batch(List&lt;? extends Row&gt;actions)</get></p>
+<h3 id="HConnection-processBatch分析"><a href="#HConnection-processBatch分析" class="headerlink" title="HConnection processBatch分析"></a>HConnection processBatch分析</h3><p>参数说明：<br>list:一系列操作<br>table：表名<br>pool:线程池<br>results:用来存放最终结果<br>processBatch调用processBatchCallback(</p>
+<h3 id="HConnection-processBatchCallback分析"><a href="#HConnection-processBatchCallback分析" class="headerlink" title="HConnection processBatchCallback分析"></a>HConnection processBatchCallback分析</h3><h4 id="主要流程"><a href="#主要流程" class="headerlink" title="主要流程"></a>主要流程</h4><ol>
+<li>将操作请求按照RegionServer分类  </li>
+<li>将每个操作请求结合放入线程池中执行  </li>
+<li>收集失败和成功信息  </li>
+<li>收集所有的失败操作，进行重试</li>
+</ol>
+<h4 id="数据结构"><a href="#数据结构" class="headerlink" title="数据结构"></a>数据结构</h4><p><code>Action<r> action = new Action<r>(row, i);</r></r></code><br>MultiAction类：<br>public<br>有序的Map  </p>
+<ul>
+<li>key:regionName  </li>
+<li>value:一系列Get/Put/Delete操作  </li>
+</ul>
+<p>processBatchCallback中使用的数据结构：<br>Map<hregionlocation,multiaction<r>&gt; actionByServer = new HashMap<hregionlocation, multionaction<r="">&gt;();</hregionlocation,></hregionlocation,multiaction<r></p>
+<h4 id="processBatchBack源码"><a href="#processBatchBack源码" class="headerlink" title="processBatchBack源码"></a>processBatchBack源码</h4>
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2016/07/24/HBase-Region定位/" itemprop="url">
+                  HBase Region定位
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-07-24T16:22:33+08:00" content="2016-07-24">
+              2016-07-24
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/HBase/" itemprop="url" rel="index">
+                    <span itemprop="name">HBase</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/HBase/源码分析/" itemprop="url" rel="index">
+                    <span itemprop="name">源码分析</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="什么时候需要Region定位？"><a href="#什么时候需要Region定位？" class="headerlink" title="什么时候需要Region定位？"></a>什么时候需要Region定位？</h2><p>　　<strong>每个RegionServer包含多个的Region，每个Region包含一定范围内的行。</strong>HBase client执行Get、Put等操作，都需要定位Region，与Region所在的RegionServer建立连接，进行RPC调用。  </p>
+<h2 id="Region定位过程"><a href="#Region定位过程" class="headerlink" title="Region定位过程"></a>Region定位过程</h2><h3 id="Catalog-Table"><a href="#Catalog-Table" class="headerlink" title="Catalog Table"></a>Catalog Table</h3><p>HBase有两个特殊的表<strong>-ROOT-</strong>和<strong>.MEAT.</strong>。  </p>
+<ul>
+<li>-ROOT-保存了.META.表的位置。-ROOT-的位置信息存储在Zookeeper中。  </li>
+<li>.MEAT.保存了一系列Region信息。</li>
+</ul>
+<h3 id="一次查找流程"><a href="#一次查找流程" class="headerlink" title="一次查找流程"></a>一次查找流程</h3><ol>
+<li>Client从Zookeeper查找-ROOT-所在的RegionServer为RS1  </li>
+<li>Client与RS1建立通信，查找-ROOT-，找到rowkey所在的.META.的RegionServer为RS2  </li>
+<li>Client与RS2建立通信，查找-META-，找到rowkey所属Region的RegionServer为RS3  </li>
+</ol>
+<h3 id="缓存"><a href="#缓存" class="headerlink" title="缓存"></a>缓存</h3><p>Client可以缓存Region location。</p>
+<h2 id="源码分析"><a href="#源码分析" class="headerlink" title="源码分析"></a>源码分析</h2><p>HConnectionImplementation的getRegionLocation方法：  </p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2016/07/24/HBase总体架构/" itemprop="url">
+                  HBase总体架构
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-07-24T15:01:21+08:00" content="2016-07-24">
+              2016-07-24
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/HBase/" itemprop="url" rel="index">
+                    <span itemprop="name">HBase</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/HBase/HBase架构/" itemprop="url" rel="index">
+                    <span itemprop="name">HBase架构</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="架构图"><a href="#架构图" class="headerlink" title="架构图"></a>架构图</h2><p><img src="https://github.com/TinyR/images/blob/master/HBase/overview.png?raw=true" alt="HBase架构图"></p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2016/07/24/HBase概念视图与物理视图/" itemprop="url">
+                  HBase概念视图与物理视图
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-07-24T14:34:27+08:00" content="2016-07-24">
+              2016-07-24
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/HBase/" itemprop="url" rel="index">
+                    <span itemprop="name">HBase</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>建议先看上一篇：HBase数据模型  </p>
+<p>采用HBase官方文档的示例。  </p>
+<h2 id="概念视图"><a href="#概念视图" class="headerlink" title="概念视图:"></a>概念视图:</h2><p>表webtable:<br><img src="https://github.com/TinyR/images/blob/master/HBase/conceptual-view.PNG?raw=true" alt="HBase概念视图">  </p>
+<h2 id="物理视图："><a href="#物理视图：" class="headerlink" title="物理视图："></a>物理视图：</h2><p>anchor列族:<br><img src="https://github.com/TinyR/images/blob/master/HBase/anchor.PNG?raw=true" alt="anchor列族"></p>
+<p>contents列族：<br><img src="https://github.com/TinyR/images/blob/master/HBase/contents.PNG?raw=true" alt="contents列族">   </p>
+<p>参考：<br><a href="http://hbase.apache.org/book.html#datamodel" target="_blank" rel="external">HBase官方文档，Data Model部分</a></p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2016/07/24/HBase数据模型/" itemprop="url">
+                  HBase数据模型
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-07-24T13:45:55+08:00" content="2016-07-24">
+              2016-07-24
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/HBase/" itemprop="url" rel="index">
+                    <span itemprop="name">HBase</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>　　我觉得关于HBase、Bigtable数据模型的最好阐述来源于论文《<em>Bigtable: A Distributed Storage System for Structured Data</em>》section2 Data Model:</p>
+<blockquote>
+<p>A Bigtable is a sparse, distributed, persistent multidimensional sorted map.
+　　</p>
+</blockquote>
+<p>　　关键词:<strong><em>sparse distributed persistent multi-dimensional sorted map</em></strong><br>　　以上几个关键词的详细阐述可参考博客<a href="http://jimbojw.com/wiki/index.php?title=Understanding_Hbase_and_BigTable" target="_blank" rel="external">Understanting HBase and BigTable</a>。<br>　　Bigtable论文继续阐述:</p>
+<blockquote>
+<p>The map is indexed by a row key, column key, and a timestamp; each value in the map is an uninterpreted array of bytes.</p>
+<p>(row:string,column:string,time:int64) -&gt; string</p>
+</blockquote>
+<p>　　HBase使用的数据模型与Bigtable类似。<br>　　了解了HBase、Bigtable的数据模型，再去看HBase的概念图与物理视图，便能很好地理解。</p>
+<p>　　参考:<br>　　<em>Bigtable: A Distributed Storage System for Structured Data</em><br>　　<a href="http://jimbojw.com/wiki/index.php?title=Understanding_Hbase_and_BigTable" target="_blank" rel="external">Understanting HBase and BigTable</a><br>　　<a href="http://hbase.apache.org/book.html#datamodel" target="_blank" rel="external">HBase官方文档，Data Model部分</a></p>
 
           
         
@@ -349,21 +894,35 @@
       <section class="site-overview sidebar-panel  sidebar-panel-active ">
         <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
           <img class="site-author-image" itemprop="image"
-               src="/images/avatar.gif"
-               alt="John Doe" />
-          <p class="site-author-name" itemprop="name">John Doe</p>
-          <p class="site-description motion-element" itemprop="description"></p>
+               src="/uploads/images/jfm1.jpg"
+               alt="RNA" />
+          <p class="site-author-name" itemprop="name">RNA</p>
+          <p class="site-description motion-element" itemprop="description">Welcome~</p>
         </div>
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">1</span>
-              <span class="site-state-item-name">Artikel</span>
+              <span class="site-state-item-count">5</span>
+              <span class="site-state-item-name">日志</span>
             </a>
           </div>
 
           
+            <div class="site-state-item site-state-categories">
+              
+                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-name">分类</span>
+              
+            </div>
+          
 
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">2</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
           
 
         </nav>
@@ -401,17 +960,17 @@
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
-  <span class="author" itemprop="copyrightHolder">John Doe</span>
+  <span class="author" itemprop="copyrightHolder">RNA</span>
 </div>
 
 <div class="powered-by">
-  Erstellt mit  <a class="theme-link" href="http://hexo.io">Hexo</a>
+  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
 </div>
 
 <div class="theme-info">
-  Theme -
+  主题 -
   <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
-    NexT.Muse
+    NexT.Mist
   </a>
 </div>
 
