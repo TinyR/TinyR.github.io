@@ -96,7 +96,7 @@ Region定位过程Catalog TableHBase有两个特殊的表-ROOT-和.MEAT.。
 Region定位过程Catalog TableHBase有两个特殊的表-ROOT-和.MEAT.。  
 
 -ROOT-保存了.M">
-<meta property="og:updated_time" content="2016-07-24T10:24:01.915Z">
+<meta property="og:updated_time" content="2016-07-26T15:44:26.087Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="HBase Region定位">
 <meta name="twitter:description" content="什么时候需要Region定位？　　每个RegionServer包含多个的Region，每个Region包含一定范围内的行。HBase client执行Get、Put等操作，都需要定位Region，与Region所在的RegionServer建立连接，进行RPC调用。  
@@ -328,7 +328,7 @@ Region定位过程Catalog TableHBase有两个特殊的表-ROOT-和.MEAT.。
 <li>Client与RS2建立通信，查找-META-，找到rowkey所属Region的RegionServer为RS3  </li>
 </ol>
 <h3 id="缓存"><a href="#缓存" class="headerlink" title="缓存"></a>缓存</h3><p>Client可以缓存Region location。</p>
-<h2 id="源码分析"><a href="#源码分析" class="headerlink" title="源码分析"></a>源码分析</h2><p>HConnectionImplementation的getRegionLocation方法：  </p>
+<h2 id="源码分析"><a href="#源码分析" class="headerlink" title="源码分析"></a>源码分析</h2><p>HConnectionImplementation的locateRegion方法：<br><code><br>private HRegionLocation locateRegion(final byte [] tableName,<br>      final byte [] row, boolean useCache, boolean retry)<br>    throws IOException {<br>      if (this.closed) throw new IOException(toString() + “ closed”);<br>      if (tableName == null || tableName.length == 0) {<br>        throw new IllegalArgumentException(<br>            “table name cannot be null or zero length”);<br>      }<br>      ensureZookeeperTrackers();<br>      if (Bytes.equals(tableName, HConstants.ROOT_TABLE_NAME)) {<br>        try {<br>          ServerName servername = this.rootRegionTracker.waitRootRegionLocation(this.rpcTimeout);<br>          LOG.debug(“Looked up root region location, connection=” + this +<br>            “; serverName=” + ((servername == null)? “”: servername.toString()));<br>          if (servername == null) return null;<br>          return new HRegionLocation(HRegionInfo.ROOT_REGIONINFO,<br>            servername.getHostname(), servername.getPort());<br>        } catch (InterruptedException e) {<br>          Thread.currentThread().interrupt();<br>          return null;<br>        }<br>      } else if (Bytes.equals(tableName, HConstants.META_TABLE_NAME)) {<br>        return locateRegionInMeta(HConstants.ROOT_TABLE_NAME, tableName, row,<br>            useCache, metaRegionLock, retry);<br>      } else {<br>        // Region not in the cache - have to go to the meta RS<br>        return locateRegionInMeta(HConstants.META_TABLE_NAME, tableName, row,<br>            useCache, userRegionLock, retry);<br>      }<br>    }<br></code></p>
 
       
     </div>
