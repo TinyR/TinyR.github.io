@@ -84,15 +84,22 @@
 
 
 
-<meta name="description" content="Welcome~">
-<meta property="og:type" content="website">
-<meta property="og:title" content="RNA">
-<meta property="og:url" content="http://yoursite.com/tags/源码分析/index.html">
+<meta name="description" content="MemStore FlushHBase基于LSM引擎。更新的数据会首先写入MemStore，当满足一定条件以后，MemStore会刷写到磁盘，生成一个HFile文件。MemStore的flush单元是Region。即当MemStore flush时，同一Region下的所有MemStore都会被flush。
+触发条件
+MemStore级别限制：当一个MemStore大小达到上限(hbase.hre">
+<meta property="og:type" content="article">
+<meta property="og:title" content="HBase MemStore Flush">
+<meta property="og:url" content="http://yoursite.com/2016/07/31/HBase-MemStore-Flush/index.html">
 <meta property="og:site_name" content="RNA">
-<meta property="og:description" content="Welcome~">
+<meta property="og:description" content="MemStore FlushHBase基于LSM引擎。更新的数据会首先写入MemStore，当满足一定条件以后，MemStore会刷写到磁盘，生成一个HFile文件。MemStore的flush单元是Region。即当MemStore flush时，同一Region下的所有MemStore都会被flush。
+触发条件
+MemStore级别限制：当一个MemStore大小达到上限(hbase.hre">
+<meta property="og:updated_time" content="2016-07-31T12:12:50.370Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="RNA">
-<meta name="twitter:description" content="Welcome~">
+<meta name="twitter:title" content="HBase MemStore Flush">
+<meta name="twitter:description" content="MemStore FlushHBase基于LSM引擎。更新的数据会首先写入MemStore，当满足一定条件以后，MemStore会刷写到磁盘，生成一个HFile文件。MemStore的flush单元是Region。即当MemStore flush时，同一Region下的所有MemStore都会被flush。
+触发条件
+MemStore级别限制：当一个MemStore大小达到上限(hbase.hre">
 
 
 
@@ -113,9 +120,9 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/tags/源码分析/"/>
+  <link rel="canonical" href="http://yoursite.com/2016/07/31/HBase-MemStore-Flush/"/>
 
-  <title> 标签: 源码分析 | RNA </title>
+  <title> HBase MemStore Flush | RNA </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -136,7 +143,7 @@
     
   
 
-  <div class="container one-collumn sidebar-position-left  ">
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -214,46 +221,128 @@
           <div id="content" class="content">
             
 
-  <div id="posts" class="posts-collapse">
-    <div class="collection-title">
-      <h2 >
-        源码分析
-        <small>标签</small>
-      </h2>
-    </div>
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
 
     
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                HBase MemStore Flush
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-07-31T19:15:21+08:00" content="2016-07-31">
+              2016-07-31
+            </time>
+          </span>
+
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
       
 
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
+      
+        <h2 id="MemStore-Flush"><a href="#MemStore-Flush" class="headerlink" title="MemStore Flush"></a>MemStore Flush</h2><p>HBase基于LSM引擎。更新的数据会首先写入MemStore，当满足一定条件以后，MemStore会刷写到磁盘，生成一个HFile文件。<strong>MemStore的flush单元是Region。即当MemStore flush时，同一Region下的所有MemStore都会被flush。</strong></p>
+<h3 id="触发条件"><a href="#触发条件" class="headerlink" title="触发条件"></a>触发条件</h3><ol>
+<li>MemStore级别限制：当一个MemStore大小达到上限(hbase.hregion.memstore.flush.size)，该region下的所有MemStore都会被刷写到磁盘。</li>
+<li>RegionServer级别：当总的MemStore占用内存超过hbase.regionserver.global.memstore.upperlimit,触发flush,从MemStore占用内存最多的region开始。直到内存占用比低于hbase.regionserver.global.memstore.lowerLimit停止。</li>
+<li>当WAL日志的数量达到hbase.regionserver.max.logs，会触发flush,flush的顺序基于MemStore的时间。直到WAL数量降到hbase.regionserver.max.logs一下。</li>
+<li>手动触发。shell命令flush ‘tablename’或者flush ‘region name’。</li>
+</ol>
+<h3 id="flush流程"><a href="#flush流程" class="headerlink" title="flush流程"></a>flush流程</h3><p>分成三个阶段：  </p>
+<ol>
+<li>prepare阶段：将MemStore内数据集kvset作为快照snapshot，新建一个新的kvset，后续的写入操作都写入kvset中。prepare阶段需要获得region的updateLock的写锁。</li>
+<li>flush阶段:将prepare阶段生成的snapshot持久化为临时文件，放到tmp目录下。</li>
+<li>commit阶段:将flush阶段生成的文件从tmp目录移到对应的ColumnFamily目录下。</li>
+</ol>
 
-      <h1 class="post-title">
+      
+    </div>
+
+    <div>
+      
         
-            <a class="post-title-link" href="/2016/07/24/HBase-Client端批量处理操作分析/" itemprop="url">
-              
-                <span itemprop="name">HBase Client端批量处理操作分析</span>
-              
-            </a>
+
+      
+    </div>
+
+    <div>
+      
         
-      </h1>
 
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2016-07-24T18:29:50+08:00"
-              content="2016-07-24" >
-          07-24
-        </time>
-      </div>
+      
+    </div>
 
-    </header>
+    <footer class="post-footer">
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/07/30/HBase-MemStore/" rel="next" title="HBase MemStore">
+                <i class="fa fa-chevron-left"></i> HBase MemStore
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
   </article>
 
 
-    
-  </div>
 
-  
+    <div class="post-spread">
+      
+    </div>
+  </div>
 
 
           </div>
@@ -261,6 +350,10 @@
 
 
           
+  <div class="comments" id="comments">
+    
+  </div>
+
 
         </div>
         
@@ -280,8 +373,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview sidebar-panel  sidebar-panel-active ">
+      <section class="site-overview sidebar-panel ">
         <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
           <img class="site-author-image" itemprop="image"
                src="/uploads/images/jfm1.jpg"
@@ -331,6 +433,17 @@
 
       </section>
 
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#MemStore-Flush"><span class="nav-number">1.</span> <span class="nav-text">MemStore Flush</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#触发条件"><span class="nav-number">1.1.</span> <span class="nav-text">触发条件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#flush流程"><span class="nav-number">1.2.</span> <span class="nav-text">flush流程</span></a></li></ol></li></ol></div>
+            
+          </div>
+        </section>
       
 
     </div>
@@ -427,6 +540,10 @@
   
 
   
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
 
   
 

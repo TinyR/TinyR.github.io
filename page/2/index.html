@@ -68,7 +68,7 @@
 <link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="HBase," />
+  <meta name="keywords" content="Hexo, NexT" />
 
 
 
@@ -84,25 +84,15 @@
 
 
 
-<meta name="description" content="什么时候需要Region定位？　　每个RegionServer包含多个的Region，每个Region包含一定范围内的行。HBase client执行Get、Put等操作，都需要定位Region，与Region所在的RegionServer建立连接，进行RPC调用。  
-Region定位过程Catalog TableHBase有两个特殊的表-ROOT-和.MEAT.。  
-
--ROOT-保存了.M">
-<meta property="og:type" content="article">
-<meta property="og:title" content="HBase Region定位">
-<meta property="og:url" content="http://yoursite.com/2016/07/24/HBase-Region定位/index.html">
+<meta name="description" content="Welcome~">
+<meta property="og:type" content="website">
+<meta property="og:title" content="RNA">
+<meta property="og:url" content="http://yoursite.com/page/2/index.html">
 <meta property="og:site_name" content="RNA">
-<meta property="og:description" content="什么时候需要Region定位？　　每个RegionServer包含多个的Region，每个Region包含一定范围内的行。HBase client执行Get、Put等操作，都需要定位Region，与Region所在的RegionServer建立连接，进行RPC调用。  
-Region定位过程Catalog TableHBase有两个特殊的表-ROOT-和.MEAT.。  
-
--ROOT-保存了.M">
-<meta property="og:updated_time" content="2016-07-29T05:51:18.029Z">
+<meta property="og:description" content="Welcome~">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="HBase Region定位">
-<meta name="twitter:description" content="什么时候需要Region定位？　　每个RegionServer包含多个的Region，每个Region包含一定范围内的行。HBase client执行Get、Put等操作，都需要定位Region，与Region所在的RegionServer建立连接，进行RPC调用。  
-Region定位过程Catalog TableHBase有两个特殊的表-ROOT-和.MEAT.。  
-
--ROOT-保存了.M">
+<meta name="twitter:title" content="RNA">
+<meta name="twitter:description" content="Welcome~">
 
 
 
@@ -123,9 +113,9 @@ Region定位过程Catalog TableHBase有两个特殊的表-ROOT-和.MEAT.。
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2016/07/24/HBase-Region定位/"/>
+  <link rel="canonical" href="http://yoursite.com/page/2/"/>
 
-  <title> HBase Region定位 | RNA </title>
+  <title> RNA </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -146,7 +136,9 @@ Region定位过程Catalog TableHBase有两个特殊的表-ROOT-和.MEAT.。
     
   
 
-  <div class="container one-collumn sidebar-position-left page-post-detail ">
+  <div class="container one-collumn sidebar-position-left 
+   page-home 
+ ">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -223,9 +215,9 @@ Region定位过程Catalog TableHBase有两个特殊的表-ROOT-和.MEAT.。
         <div class="content-wrap">
           <div id="content" class="content">
             
-
-  <div id="posts" class="posts-expand">
+  <section id="posts" class="posts-expand">
     
+      
 
   
   
@@ -245,7 +237,10 @@ Region定位过程Catalog TableHBase有两个特殊的表-ROOT-和.MEAT.。
             
             
               
-                HBase Region定位
+                
+                <a class="post-title-link" href="/2016/07/24/HBase-Region定位/" itemprop="url">
+                  HBase Region定位
+                </a>
               
             
           </h1>
@@ -316,7 +311,9 @@ Region定位过程Catalog TableHBase有两个特殊的表-ROOT-和.MEAT.。
       
 
       
-        <h2 id="什么时候需要Region定位？"><a href="#什么时候需要Region定位？" class="headerlink" title="什么时候需要Region定位？"></a>什么时候需要Region定位？</h2><p>　　<strong>每个RegionServer包含多个的Region，每个Region包含一定范围内的行。</strong>HBase client执行Get、Put等操作，都需要定位Region，与Region所在的RegionServer建立连接，进行RPC调用。  </p>
+        
+          
+            <h2 id="什么时候需要Region定位？"><a href="#什么时候需要Region定位？" class="headerlink" title="什么时候需要Region定位？"></a>什么时候需要Region定位？</h2><p>　　<strong>每个RegionServer包含多个的Region，每个Region包含一定范围内的行。</strong>HBase client执行Get、Put等操作，都需要定位Region，与Region所在的RegionServer建立连接，进行RPC调用。  </p>
 <h2 id="Region定位过程"><a href="#Region定位过程" class="headerlink" title="Region定位过程"></a>Region定位过程</h2><h3 id="Catalog-Table"><a href="#Catalog-Table" class="headerlink" title="Catalog Table"></a>Catalog Table</h3><p>HBase有两个特殊的表<strong>-ROOT-</strong>和<strong>.MEAT.</strong>。  </p>
 <ul>
 <li>-ROOT-保存了.META.表的位置。-ROOT-的位置信息存储在Zookeeper中。  </li>
@@ -340,63 +337,407 @@ Region定位过程Catalog TableHBase有两个特殊的表-ROOT-和.MEAT.。
 <h3 id="缓存实现"><a href="#缓存实现" class="headerlink" title="缓存实现"></a>缓存实现</h3><h4 id="数据结构"><a href="#数据结构" class="headerlink" title="数据结构"></a>数据结构</h4><p><strong>两层Map</strong><br>HConnectionImplementation<br>成员变量：<br>private final Map<hashedbytes, softvaluesortedmap<byte[],="" hregionlocation="">&gt; cachedRegionLocations<br>Key为tableName。<br>Value为该table的map of cached locations。  </hashedbytes,></p>
 <p>SoftValueSortedMap:<br>内部使用TreeMap实现<br>key:某个Region的startKey<br>value:HRegionLocation</p>
 
+          
+        
       
     </div>
 
     <div>
       
-        
-
-      
     </div>
 
     <div>
-      
-        
-
       
     </div>
 
     <footer class="post-footer">
       
-        <div class="post-tags">
-          
-            <a href="/tags/HBase/" rel="tag">#HBase</a>
-          
-        </div>
+
       
 
       
-        <div class="post-nav">
-          <div class="post-nav-next post-nav-item">
-            
-              <a href="/2016/07/24/HBase总体架构/" rel="next" title="HBase总体架构">
-                <i class="fa fa-chevron-left"></i> HBase总体架构
-              </a>
-            
-          </div>
-
-          <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2016/07/24/HBase-Client端批量处理操作分析/" rel="prev" title="HBase Client端批量处理操作分析">
-                HBase Client端批量处理操作分析 <i class="fa fa-chevron-right"></i>
-              </a>
-            
-          </div>
-        </div>
       
-
-      
+        <div class="post-eof"></div>
       
     </footer>
   </article>
 
 
+    
+      
 
-    <div class="post-spread">
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2016/07/24/HBase总体架构/" itemprop="url">
+                  HBase总体架构
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-07-24T15:01:21+08:00" content="2016-07-24">
+              2016-07-24
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/HBase/" itemprop="url" rel="index">
+                    <span itemprop="name">HBase</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/HBase/HBase架构/" itemprop="url" rel="index">
+                    <span itemprop="name">HBase架构</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="架构图"><a href="#架构图" class="headerlink" title="架构图"></a>架构图</h2><p><img src="https://github.com/TinyR/images/blob/master/HBase/overview.png?raw=true" alt="HBase架构图"></p>
+
+          
+        
       
     </div>
-  </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2016/07/24/HBase概念视图与物理视图/" itemprop="url">
+                  HBase概念视图与物理视图
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-07-24T14:34:27+08:00" content="2016-07-24">
+              2016-07-24
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/HBase/" itemprop="url" rel="index">
+                    <span itemprop="name">HBase</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>建议先看上一篇：HBase数据模型  </p>
+<p>采用HBase官方文档的示例。  </p>
+<h2 id="概念视图"><a href="#概念视图" class="headerlink" title="概念视图:"></a>概念视图:</h2><p>表webtable:<br><img src="https://github.com/TinyR/images/blob/master/HBase/conceptual-view.PNG?raw=true" alt="HBase概念视图">  </p>
+<h2 id="物理视图："><a href="#物理视图：" class="headerlink" title="物理视图："></a>物理视图：</h2><p>anchor列族:<br><img src="https://github.com/TinyR/images/blob/master/HBase/anchor.PNG?raw=true" alt="anchor列族"></p>
+<p>contents列族：<br><img src="https://github.com/TinyR/images/blob/master/HBase/contents.PNG?raw=true" alt="contents列族">   </p>
+<p>参考：<br><a href="http://hbase.apache.org/book.html#datamodel" target="_blank" rel="external">HBase官方文档，Data Model部分</a></p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2016/07/24/HBase数据模型/" itemprop="url">
+                  HBase数据模型
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-07-24T13:45:55+08:00" content="2016-07-24">
+              2016-07-24
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/HBase/" itemprop="url" rel="index">
+                    <span itemprop="name">HBase</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>　　我觉得关于HBase、Bigtable数据模型的最好阐述来源于论文《<em>Bigtable: A Distributed Storage System for Structured Data</em>》section2 Data Model:</p>
+<blockquote>
+<p>A Bigtable is a sparse, distributed, persistent multidimensional sorted map.
+　　</p>
+</blockquote>
+<p>　　关键词:<strong><em>sparse distributed persistent multi-dimensional sorted map</em></strong><br>　　以上几个关键词的详细阐述可参考博客<a href="http://jimbojw.com/wiki/index.php?title=Understanding_Hbase_and_BigTable" target="_blank" rel="external">Understanting HBase and BigTable</a>。<br>　　Bigtable论文继续阐述:</p>
+<blockquote>
+<p>The map is indexed by a row key, column key, and a timestamp; each value in the map is an uninterpreted array of bytes.</p>
+<p>(row:string,column:string,time:int64) -&gt; string</p>
+</blockquote>
+<p>　　HBase使用的数据模型与Bigtable类似。<br>　　了解了HBase、Bigtable的数据模型，再去看HBase的概念图与物理视图，便能很好地理解。</p>
+<p>　　参考:<br>　　<em>Bigtable: A Distributed Storage System for Structured Data</em><br>　　<a href="http://jimbojw.com/wiki/index.php?title=Understanding_Hbase_and_BigTable" target="_blank" rel="external">Understanting HBase and BigTable</a><br>　　<a href="http://hbase.apache.org/book.html#datamodel" target="_blank" rel="external">HBase官方文档，Data Model部分</a></p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+  </section>
+
+  
+  <nav class="pagination">
+    <a class="extend prev" rel="prev" href="/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="page-number current">2</span>
+  </nav>
+
 
 
           </div>
@@ -404,10 +745,6 @@ Region定位过程Catalog TableHBase有两个特殊的表-ROOT-和.MEAT.。
 
 
           
-  <div class="comments" id="comments">
-    
-  </div>
-
 
         </div>
         
@@ -427,17 +764,8 @@ Region定位过程Catalog TableHBase有两个特殊的表-ROOT-和.MEAT.。
       
 
       
-        <ul class="sidebar-nav motion-element">
-          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
-            文章目录
-          </li>
-          <li class="sidebar-nav-overview" data-target="site-overview">
-            站点概览
-          </li>
-        </ul>
-      
 
-      <section class="site-overview sidebar-panel ">
+      <section class="site-overview sidebar-panel  sidebar-panel-active ">
         <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
           <img class="site-author-image" itemprop="image"
                src="/uploads/images/jfm1.jpg"
@@ -487,17 +815,6 @@ Region定位过程Catalog TableHBase有两个特殊的表-ROOT-和.MEAT.。
 
       </section>
 
-      
-        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
-          <div class="post-toc">
-            
-              
-            
-            
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#什么时候需要Region定位？"><span class="nav-number">1.</span> <span class="nav-text">什么时候需要Region定位？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Region定位过程"><span class="nav-number">2.</span> <span class="nav-text">Region定位过程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Catalog-Table"><span class="nav-number">2.1.</span> <span class="nav-text">Catalog Table</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#一次查找流程"><span class="nav-number">2.2.</span> <span class="nav-text">一次查找流程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#缓存"><span class="nav-number">2.3.</span> <span class="nav-text">缓存</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#源码分析"><span class="nav-number">3.</span> <span class="nav-text">源码分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#HConnectionImplementation的locateRegion方法："><span class="nav-number">3.1.</span> <span class="nav-text">HConnectionImplementation的locateRegion方法：</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#locateRegion方法理解："><span class="nav-number">3.1.1.</span> <span class="nav-text">locateRegion方法理解：</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#HConnectionImplementation的locateRegionInMeta方法"><span class="nav-number">3.2.</span> <span class="nav-text">HConnectionImplementation的locateRegionInMeta方法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#locateRegionInMeta方法理解"><span class="nav-number">3.2.1.</span> <span class="nav-text">locateRegionInMeta方法理解</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#缓存实现"><span class="nav-number">3.3.</span> <span class="nav-text">缓存实现</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#数据结构"><span class="nav-number">3.3.1.</span> <span class="nav-text">数据结构</span></a></li></ol></li></ol></li></ol></div>
-            
-          </div>
-        </section>
       
 
     </div>
@@ -594,10 +911,6 @@ Region定位过程Catalog TableHBase有两个特殊的表-ROOT-和.MEAT.。
   
 
   
-  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
-<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
-
-
 
   
 

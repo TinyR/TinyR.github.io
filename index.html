@@ -238,6 +238,976 @@
             
               
                 
+                <a class="post-title-link" href="/2016/07/31/HBase-MemStore-Flush/" itemprop="url">
+                  HBase MemStore Flush
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-07-31T19:15:21+08:00" content="2016-07-31">
+              2016-07-31
+            </time>
+          </span>
+
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="MemStore-Flush"><a href="#MemStore-Flush" class="headerlink" title="MemStore Flush"></a>MemStore Flush</h2><p>HBase基于LSM引擎。更新的数据会首先写入MemStore，当满足一定条件以后，MemStore会刷写到磁盘，生成一个HFile文件。<strong>MemStore的flush单元是Region。即当MemStore flush时，同一Region下的所有MemStore都会被flush。</strong></p>
+<h3 id="触发条件"><a href="#触发条件" class="headerlink" title="触发条件"></a>触发条件</h3><ol>
+<li>MemStore级别限制：当一个MemStore大小达到上限(hbase.hregion.memstore.flush.size)，该region下的所有MemStore都会被刷写到磁盘。</li>
+<li>RegionServer级别：当总的MemStore占用内存超过hbase.regionserver.global.memstore.upperlimit,触发flush,从MemStore占用内存最多的region开始。直到内存占用比低于hbase.regionserver.global.memstore.lowerLimit停止。</li>
+<li>当WAL日志的数量达到hbase.regionserver.max.logs，会触发flush,flush的顺序基于MemStore的时间。直到WAL数量降到hbase.regionserver.max.logs一下。</li>
+<li>手动触发。shell命令flush ‘tablename’或者flush ‘region name’。</li>
+</ol>
+<h3 id="flush流程"><a href="#flush流程" class="headerlink" title="flush流程"></a>flush流程</h3><p>分成三个阶段：  </p>
+<ol>
+<li>prepare阶段：将MemStore内数据集kvset作为快照snapshot，新建一个新的kvset，后续的写入操作都写入kvset中。prepare阶段需要获得region的updateLock的写锁。</li>
+<li>flush阶段:将prepare阶段生成的snapshot持久化为临时文件，放到tmp目录下。</li>
+<li>commit阶段:将flush阶段生成的文件从tmp目录移到对应的ColumnFamily目录下。</li>
+</ol>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2016/07/30/HBase-MemStore/" itemprop="url">
+                  HBase MemStore
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-07-30T17:30:16+08:00" content="2016-07-30">
+              2016-07-30
+            </time>
+          </span>
+
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="MemStore"><a href="#MemStore" class="headerlink" title="MemStore"></a>MemStore</h2><h2 id="为什么需要MemStore"><a href="#为什么需要MemStore" class="headerlink" title="为什么需要MemStore"></a>为什么需要MemStore</h2><ol>
+<li>memstore在内存中，提高HBase写性能。</li>
+<li>通过memstore先对keyValue排好序，然后将排好序的keyValue一同刷写。</li>
+</ol>
+<h2 id="MemStore内部"><a href="#MemStore内部" class="headerlink" title="MemStore内部"></a>MemStore内部</h2><h3 id="KeyValue存放"><a href="#KeyValue存放" class="headerlink" title="KeyValue存放"></a>KeyValue存放</h3><p>　　MemStore内部使用<strong>KeyValueSkipListSet</strong>存放KeyValue。KeyValueSkipListSet本质上是一个类似<strong>SkipListSet</strong>，内部使用<strong>ConcurrentSkipListMap</strong>实现。  </p>
+<h3 id="添加KeyValue"><a href="#添加KeyValue" class="headerlink" title="添加KeyValue"></a>添加KeyValue</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">long</span> <span class="title">add</span><span class="params">(<span class="keyword">final</span> KeyValue kv)</span> </span>&#123;</div><div class="line">  KeyValue toAdd = maybeCloneWithAllocator(kv);</div><div class="line">  <span class="keyword">return</span> internalAdd(toAdd);</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">long</span> <span class="title">internalAdd</span><span class="params">(<span class="keyword">final</span> KeyValue toAdd)</span> </span>&#123;</div><div class="line">  <span class="keyword">long</span> s = heapSizeChange(toAdd, addToKVSet(toAdd));</div><div class="line">  timeRangeTracker.includeTimestamp(toAdd);</div><div class="line">  <span class="keyword">this</span>.size.addAndGet(s);</div><div class="line">  <span class="keyword">return</span> s;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">boolean</span> <span class="title">addToKVSet</span><span class="params">(KeyValue e)</span> </span>&#123;</div><div class="line">  <span class="keyword">boolean</span> b = <span class="keyword">this</span>.kvset.add(e);</div><div class="line">  setOldestEditTimeToNow();</div><div class="line">  <span class="keyword">return</span> b;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="MemStore-GC优化"><a href="#MemStore-GC优化" class="headerlink" title="MemStore GC优化"></a>MemStore GC优化</h3><h3 id="MemStore-MVCC相关"><a href="#MemStore-MVCC相关" class="headerlink" title="MemStore MVCC相关"></a>MemStore MVCC相关</h3><h3 id="MemStore-flush"><a href="#MemStore-flush" class="headerlink" title="MemStore flush"></a>MemStore flush</h3>
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2016/07/30/HBase-数据写入server端分析/" itemprop="url">
+                  HBase 数据写入server端分析
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-07-30T12:07:02+08:00" content="2016-07-30">
+              2016-07-30
+            </time>
+          </span>
+
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="HBase批量处理操作"><a href="#HBase批量处理操作" class="headerlink" title="HBase批量处理操作"></a>HBase批量处理操作</h2><p>HBase client端批处理操作，最终通过RPC,远程调用HRegionServer的multi方法。</p>
+<h2 id="HRegionServer-multi-MultiAction-multi-方法"><a href="#HRegionServer-multi-MultiAction-multi-方法" class="headerlink" title="HRegionServer multi(MultiAction multi)方法"></a>HRegionServer multi(MultiAction<r> multi)方法</r></h2><h3 id="主要流程："><a href="#主要流程：" class="headerlink" title="主要流程："></a>主要流程：</h3><ol>
+<li>对每个Region下面的action进行排序</li>
+<li>对action进行分类，delete与put放一起，最终将会调用HRegion的batchMutate方法</li>
+<li>其他操作比如：get,append调用其他方法</li>
+</ol>
+<h2 id="HRegion-batchMutate方法"><a href="#HRegion-batchMutate方法" class="headerlink" title="HRegion batchMutate方法"></a>HRegion batchMutate方法</h2><p>将会调用doMiniBatchMutation方法</p>
+<h2 id="HRegion-doMiniBatchMutation方法"><a href="#HRegion-doMiniBatchMutation方法" class="headerlink" title="HRegion doMiniBatchMutation方法"></a>HRegion doMiniBatchMutation方法</h2><h3 id="主要流程"><a href="#主要流程" class="headerlink" title="主要流程"></a>主要流程</h3><ol>
+<li>获得尽可能多的行锁，且至少一个。</li>
+<li>更新delete/put操作所对应keyvalue的timestamps为最新。获得最新的mvcc number作为write number.</li>
+<li>写memstore</li>
+<li>构建 WAL edit</li>
+<li>向WAL添加edit但不sync wal.</li>
+<li>释放行锁</li>
+<li>sync wal</li>
+<li>更新mvcc。</li>
+</ol>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2016/07/30/HBase-Put操作client端分析/" itemprop="url">
+                  HBase Put操作client端分析
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-07-30T12:03:18+08:00" content="2016-07-30">
+              2016-07-30
+            </time>
+          </span>
+
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="HTable-Put"><a href="#HTable-Put" class="headerlink" title="HTable Put"></a>HTable Put</h2><p>void put(Put put)：单个Put操作，单行。<br>void put(List<put> puts):多个Put操作一起发送给服务器端。<br>void doPut(Put put):将Put操作放入缓冲区，并判断缓冲区是否满。<br>flushCommits():执行RPC，将缓冲区内的put操作发到服务器端。<br>void validatePut(final Put put):检查Put有效性  </put></p>
+<h3 id="写缓冲区"><a href="#写缓冲区" class="headerlink" title="写缓冲区"></a>写缓冲区</h3><p>ArrayList<put> writeBuffer:写缓冲区<br>autoFlush:默认为true，每次调用put方法，最后都会自动调用flushCommits。可通过调用setAutoFlush(boolean autoFlush)进行设置。<br>writeBufferSize:缓冲区大小，超过这个值，便会调用flushCommits向服务器端提交。可通过”hbase.client.write.buffer”进行配置<br>currentWriteBufferSize:当前缓冲区大小</put></p>
+<h3 id="源码分析"><a href="#源码分析" class="headerlink" title="源码分析"></a>源码分析</h3><h4 id="doPut方法"><a href="#doPut方法" class="headerlink" title="doPut方法"></a>doPut方法</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">doPut</span><span class="params">(Put put)</span> <span class="keyword">throws</span> IOException</span>&#123;</div><div class="line">  validatePut(put);</div><div class="line">  writeBuffer.add(put);</div><div class="line">  currentWriteBufferSize += put.heapSize();</div><div class="line">  <span class="keyword">if</span> (currentWriteBufferSize &gt; writeBufferSize) &#123;</div><div class="line">    flushCommits();</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h5 id="主要流程："><a href="#主要流程：" class="headerlink" title="主要流程："></a>主要流程：</h5><ol>
+<li>Put有效性验证</li>
+<li>放入writeBuffer中</li>
+<li>判断缓冲区是否满，若满，则向服务器提交</li>
+</ol>
+<h4 id="put-Put-put-方法"><a href="#put-Put-put-方法" class="headerlink" title="put(Put put)方法"></a>put(Put put)方法</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">put</span><span class="params">(<span class="keyword">final</span> Put put)</span> <span class="keyword">throws</span> IOException </span>&#123;</div><div class="line">  doPut(put);</div><div class="line">  <span class="keyword">if</span> (autoFlush) &#123;</div><div class="line">    flushCommits();</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h5 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h5><p>　　每次先调用doPut放入缓冲区，再判断autoFlush，autoFlush默认为true，则每次flushCommits都只向服务器提交一个Put操作。</p>
+<h4 id="put-final-List-puts-方法"><a href="#put-final-List-puts-方法" class="headerlink" title="put(final List puts)方法"></a>put(final List<put> puts)方法</put></h4><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">put</span><span class="params">(<span class="keyword">final</span> List&lt;Put&gt; puts)</span> <span class="keyword">throws</span> IOException </span>&#123;</div><div class="line">  <span class="keyword">for</span> (Put put : puts) &#123;</div><div class="line">    doPut(put);</div><div class="line">  &#125;</div><div class="line">  <span class="keyword">if</span> (autoFlush) &#123;</div><div class="line">    flushCommits();</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h5 id="分析-1"><a href="#分析-1" class="headerlink" title="分析"></a>分析</h5><ol>
+<li>将所有Put操作都放入到writeBuffer中</li>
+<li>判断是否autoFlush<br>利用到了writeBuffer</li>
+</ol>
+<h4 id="flushCommits"><a href="#flushCommits" class="headerlink" title="flushCommits()"></a>flushCommits()</h4><p>调用HConnection的<strong>processBatch</strong>(writeBuffer, tableName, pool, results)方法进行批处理，获得results。<br>关于processBatch的分析，可参考另一篇笔记: HBase Client端批量处理操作分析</p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2016/07/29/HBase-Get流程/" itemprop="url">
+                  HBase Get流程
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-07-29T21:41:47+08:00" content="2016-07-29">
+              2016-07-29
+            </time>
+          </span>
+
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2016/07/29/HBase-Bloom-filter/" itemprop="url">
+                  HBase Bloom filter
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-07-29T15:55:48+08:00" content="2016-07-29">
+              2016-07-29
+            </time>
+          </span>
+
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2016/07/29/HBase-行锁设计与实现/" itemprop="url">
+                  HBase 行锁设计与实现
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-07-29T15:49:42+08:00" content="2016-07-29">
+              2016-07-29
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/HBase/" itemprop="url" rel="index">
+                    <span itemprop="name">HBase</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="HBase保证行级别的修改的原子性。"><a href="#HBase保证行级别的修改的原子性。" class="headerlink" title="HBase保证行级别的修改的原子性。"></a>HBase保证行级别的修改的原子性。</h2><h2 id="HBase行锁实现"><a href="#HBase行锁实现" class="headerlink" title="HBase行锁实现"></a>HBase行锁实现</h2><p>基于HBase 0.94<br>现版本已经有所变化</p>
+<h3 id="HRegion"><a href="#HRegion" class="headerlink" title="HRegion"></a>HRegion</h3><p><img src="https://github.com/TinyR/images/blob/master/HBase/HRegion_rowLock.PNG?raw=true" alt="HRegion rowLock"></p>
+<p>lockedRows:存放rowKey与rowlock的键值对。<br>lockIds:存放lock id与rowKey的键值对。<br>lockIdGenerator:用于生成lock id</p>
+<h3 id="获取锁"><a href="#获取锁" class="headerlink" title="获取锁"></a>获取锁</h3><p>　　obtainRowLock(final byte [] row) 调用 internalObtainRowLock(final HashedBytes rowKey, boolean waitForLock)</p>
+<h4 id="主要流程"><a href="#主要流程" class="headerlink" title="主要流程"></a>主要流程</h4><ol>
+<li>新建锁rowLatch</li>
+<li>循环，直到获得锁(除非!waitForLock)：rowLatch放入到lockedRows中，成功则表示获得锁，如果锁已经被其他线程获得，则重新尝试。</li>
+<li>如果获得锁成功，循环，直到生成未被使用的lock id</li>
+</ol>
+<h4 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">private</span> Integer <span class="title">internalObtainRowLock</span><span class="params">(<span class="keyword">final</span> HashedBytes rowKey, <span class="keyword">boolean</span> waitForLock)</span></span></div><div class="line">      <span class="keyword">throws</span> IOException &#123;</div><div class="line">    checkRow(rowKey.getBytes(), <span class="string">"row lock"</span>);</div><div class="line">    startRegionOperation();</div><div class="line">    <span class="keyword">try</span> &#123;</div><div class="line">		<span class="comment">// 1. 新建锁</span></div><div class="line">      CountDownLatch rowLatch = <span class="keyword">new</span> CountDownLatch(<span class="number">1</span>);</div><div class="line"></div><div class="line">      </div><div class="line">		<span class="comment">//循环，直到获得锁(除非!waitForLock)</span></div><div class="line">      <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</div><div class="line">        CountDownLatch existingLatch = lockedRows.putIfAbsent(rowKey, rowLatch);</div><div class="line">        <span class="keyword">if</span> (existingLatch == <span class="keyword">null</span>) &#123;</div><div class="line">          <span class="keyword">break</span>;</div><div class="line">        &#125; <span class="keyword">else</span> &#123;</div><div class="line">          <span class="comment">// row already locked</span></div><div class="line">          <span class="keyword">if</span> (!waitForLock) &#123;</div><div class="line">            <span class="keyword">return</span> <span class="keyword">null</span>;</div><div class="line">          &#125;</div><div class="line">          <span class="keyword">try</span> &#123;</div><div class="line">            <span class="keyword">if</span> (!existingLatch.await(<span class="keyword">this</span>.rowLockWaitDuration,</div><div class="line">                            TimeUnit.MILLISECONDS)) &#123;</div><div class="line">              <span class="keyword">throw</span> <span class="keyword">new</span> IOException(<span class="string">"Timed out on getting lock for row="</span> + rowKey);</div><div class="line">            &#125;</div><div class="line">          &#125; <span class="keyword">catch</span> (InterruptedException ie) &#123;</div><div class="line">            LOG.warn(<span class="string">"internalObtainRowLock interrupted for row="</span> + rowKey);</div><div class="line">            InterruptedIOException iie = <span class="keyword">new</span> InterruptedIOException();</div><div class="line">            iie.initCause(ie);</div><div class="line">            <span class="keyword">throw</span> iie;</div><div class="line">          &#125;</div><div class="line">        &#125;</div><div class="line">      &#125;</div><div class="line"></div><div class="line">      <span class="comment">// loop until we generate an unused lock id</span></div><div class="line">		<span class="comment">//循环，直到生成未被使用的lock id</span></div><div class="line">      <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</div><div class="line">        Integer lockId = lockIdGenerator.incrementAndGet();</div><div class="line">        HashedBytes existingRowKey = lockIds.putIfAbsent(lockId, rowKey);</div><div class="line">        <span class="keyword">if</span> (existingRowKey == <span class="keyword">null</span>) &#123;</div><div class="line">          <span class="keyword">return</span> lockId;</div><div class="line">        &#125; <span class="keyword">else</span> &#123;</div><div class="line">          <span class="comment">// lockId already in use, jump generator to a new spot</span></div><div class="line">          lockIdGenerator.set(rand.nextInt());</div><div class="line">        &#125;</div><div class="line">      &#125;</div><div class="line">    &#125; <span class="keyword">finally</span> &#123;</div><div class="line">      closeRegionOperation();</div><div class="line">    &#125;</div><div class="line">  &#125;</div></pre></td></tr></table></figure>
+<h3 id="释放锁"><a href="#释放锁" class="headerlink" title="释放锁"></a>释放锁</h3><p>releaseRowLock(final Integer lockId)</p>
+<h4 id="主要流程-1"><a href="#主要流程-1" class="headerlink" title="主要流程"></a>主要流程</h4><ol>
+<li>从lockids中删除lockid</li>
+<li>从lockedRows中删除rowLatch</li>
+<li>唤醒等待获得锁的其他线程</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line"> <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">releaseRowLock</span><span class="params">(<span class="keyword">final</span> Integer lockId)</span> </span>&#123;</div><div class="line">   <span class="keyword">if</span> (lockId == <span class="keyword">null</span>) <span class="keyword">return</span>; <span class="comment">// null lock id, do nothing</span></div><div class="line"><span class="comment">// 从lockids中删除lockid</span></div><div class="line">   HashedBytes rowKey = lockIds.remove(lockId);</div><div class="line">   <span class="keyword">if</span> (rowKey == <span class="keyword">null</span>) &#123;</div><div class="line">     LOG.warn(<span class="string">"Release unknown lockId: "</span> + lockId);</div><div class="line">     <span class="keyword">return</span>;</div><div class="line">   &#125;</div><div class="line"><span class="comment">// 从lockedRows中删除rowLatch</span></div><div class="line">   CountDownLatch rowLatch = lockedRows.remove(rowKey);</div><div class="line">   <span class="keyword">if</span> (rowLatch == <span class="keyword">null</span>) &#123;</div><div class="line">     LOG.error(<span class="string">"Releases row not locked, lockId: "</span> + lockId + <span class="string">" row: "</span></div><div class="line">         + rowKey);</div><div class="line">     <span class="keyword">return</span>;</div><div class="line">   &#125;</div><div class="line"><span class="comment">// 唤醒等待获得锁的其他线程</span></div><div class="line">   rowLatch.countDown();</div><div class="line"> &#125;</div></pre></td></tr></table></figure>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p>HBase-0.94.27源码</p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2016/07/29/HBase-MVCC/" itemprop="url">
+                  HBase MVCC
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-07-29T15:49:19+08:00" content="2016-07-29">
+              2016-07-29
+            </time>
+          </span>
+
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="为什么需要MVCC"><a href="#为什么需要MVCC" class="headerlink" title="为什么需要MVCC?"></a>为什么需要MVCC?</h2><p>简单来说就是为了<strong>提高性能</strong>。<br>HBase保证了行级别的ACID。考虑下面情况：  </p>
+<h3 id="Write-Write同步"><a href="#Write-Write同步" class="headerlink" title="Write-Write同步"></a>Write-Write同步</h3><p>假如有两个并发线程同时对HBase同一行进行写操作。我们可以采用排他锁的方式进行同步，流程如下：  </p>
+<ol>
+<li>获得行锁  </li>
+<li>写Write-Ahead-Log(WAL)  </li>
+<li>更新MemStore  </li>
+<li>释放锁  </li>
+</ol>
+<h3 id="Read-Write-同步"><a href="#Read-Write-同步" class="headerlink" title="Read-Write 同步"></a>Read-Write 同步</h3><p>对于写操作，我们可以通过获得排他锁的方式保证ACID。但是对于读操作呢？一种方式是读也需要获得排他锁，然而这样的话读写操作都需要先获得行级排他锁，使得<strong>读写操作都变慢了</strong>。<br>HBase使用Multiversion Concurrency Control(MVCC)来是读操作避免获得行锁。</p>
+<h2 id="HBase-MVCC"><a href="#HBase-MVCC" class="headerlink" title="HBase MVCC"></a>HBase MVCC</h2><p>HBase的MVCC是这样的:<br>写操作：  </p>
+<ol>
+<li>获得行锁，然后每个写操作赋予一个write number  </li>
+<li>每个写入的data cell都赋予这个write number<br>读操作  </li>
+<li>每个读操作都记录一个read timstamp,也叫read point  </li>
+<li>读的时候会进行比较，返回的data cell满足write number &lt;= read point。这样就不会读到读操作之后发生的写操作的数据了<br>所以整个写流程变成：  </li>
+<li>获得行锁  </li>
+<li>获得新的write number  </li>
+<li>写Write-Ahead-Log(WAL)  </li>
+<li>更新MemStore  </li>
+<li>结束write number</li>
+<li>释放行锁  </li>
+</ol>
+<h2 id="HBase实现"><a href="#HBase实现" class="headerlink" title="HBase实现"></a>HBase实现</h2><h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p>Apache HBase Internals: Locking and Multiversion COncurrency Control</p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2016/07/29/HBase重试机制/" itemprop="url">
+                  HBase重试机制
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-07-29T13:27:00+08:00" content="2016-07-29">
+              2016-07-29
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/HBase/" itemprop="url" rel="index">
+                    <span itemprop="name">HBase</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="重试机制"><a href="#重试机制" class="headerlink" title="重试机制"></a>重试机制</h2><p><strong>HBase在执行RPC失败之后会执行重试机制。</strong></p>
+<h3 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h3><p>hbase.client.retries.number:重试的最大次数<br>hbase.client.pause:</p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
                 <a class="post-title-link" href="/2016/07/24/HBase-Client端批量处理操作分析/" itemprop="url">
                   HBase Client端批量处理操作分析
                 </a>
@@ -314,534 +1284,18 @@
         
           
             <h2 id="为什么需要批量处理操作"><a href="#为什么需要批量处理操作" class="headerlink" title="为什么需要批量处理操作"></a>为什么需要批量处理操作</h2><p>　　HTable的get(Get get),delete(Delete delete),put(Put put)都是单个操作。<strong>每个Get/Put/Delete实际上都是一个RPC操作。</strong><br>　　当一个应用程序需要进行大量Get/Put/Delete操作，比如：需要不断向服务器put数据。这时候可以通过<strong>将多个数据通过一次RPC操作，提交给服务器，将减少RPC请求</strong>，这样可以大大提高性能。</p>
-<h2 id="有哪些批处理操作"><a href="#有哪些批处理操作" class="headerlink" title="有哪些批处理操作"></a>有哪些批处理操作</h2><p>HBase提供了一下批处理操作：<br>Get、Put、Delete都实现了Row接口。</p>
-<h2 id="源码分析"><a href="#源码分析" class="headerlink" title="源码分析"></a>源码分析</h2><p>get(List<get> gets&gt;底层调用了batch(List)<br>batch(List&lt;? extends Row&gt;actions)</get></p>
-<h3 id="HConnection-processBatch分析"><a href="#HConnection-processBatch分析" class="headerlink" title="HConnection processBatch分析"></a>HConnection processBatch分析</h3><p>参数说明：<br>list:一系列操作<br>table：表名<br>pool:线程池<br>results:用来存放最终结果<br>processBatch调用processBatchCallback(</p>
+<h2 id="有哪些批处理操作"><a href="#有哪些批处理操作" class="headerlink" title="有哪些批处理操作"></a>有哪些批处理操作</h2><p>HBase提供了以下批处理操作：<br>public Result[] get(List<get> gets)<br>public void batch(final List&lt;?extends Row&gt; actions, final Object[] results)<br>public Object[] batch(final List&lt;? extends Row&gt; actions)<br>public void put(final List<put> puts)  </put></get></p>
+<p><strong>Get、Put、Delete都实现了Row接口。</strong></p>
+<h2 id="源码分析"><a href="#源码分析" class="headerlink" title="源码分析"></a>源码分析</h2><p>get(List<get> gets)底层调用了batch(final List&lt;? extends Row&gt; actions)<br>batch(final List&lt;? extends Row&gt; actions)、batch(final List&lt;?extends Row&gt; actions, final Object[] results)、put(final List<put> puts)底层都调用了HConnection的processBatch(List&lt;? extends Row&gt; list, final byte[] tableName, ExecutorService pool, Object[] results) 方法。</put></get></p>
+<h3 id="HConnection-processBatch分析"><a href="#HConnection-processBatch分析" class="headerlink" title="HConnection processBatch分析"></a>HConnection processBatch分析</h3><p>参数说明：<br>list:一系列操作<br>tableName：表名<br>pool:线程池<br>results:用来存放最终结果<br>processBatch调用processBatchCallback(List&lt;? extends Row&gt; list, byte[] tableName, ExecutorService pool, Object[] results, Batch.Callback<r> callback)方法。</r></p>
 <h3 id="HConnection-processBatchCallback分析"><a href="#HConnection-processBatchCallback分析" class="headerlink" title="HConnection processBatchCallback分析"></a>HConnection processBatchCallback分析</h3><h4 id="主要流程"><a href="#主要流程" class="headerlink" title="主要流程"></a>主要流程</h4><ol>
-<li>将操作请求按照RegionServer分类  </li>
-<li>将每个操作请求结合放入线程池中执行  </li>
+<li>将操作请求(puts/gets/deletes)按照RegionServer分类  </li>
+<li>将每个操作请求集合放入线程池中执行  </li>
 <li>收集失败和成功信息  </li>
 <li>收集所有的失败操作，进行重试</li>
 </ol>
-<h4 id="数据结构"><a href="#数据结构" class="headerlink" title="数据结构"></a>数据结构</h4><p><code>Action<r> action = new Action<r>(row, i);</r></r></code><br>MultiAction类：<br>public<br>有序的Map  </p>
-<ul>
-<li>key:regionName  </li>
-<li>value:一系列Get/Put/Delete操作  </li>
-</ul>
-<p>processBatchCallback中使用的数据结构：<br>Map<hregionlocation,multiaction<r>&gt; actionByServer = new HashMap<hregionlocation, multionaction<r="">&gt;();</hregionlocation,></hregionlocation,multiaction<r></p>
-<h4 id="processBatchBack源码"><a href="#processBatchBack源码" class="headerlink" title="processBatchBack源码"></a>processBatchBack源码</h4>
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/07/24/HBase-Region定位/" itemprop="url">
-                  HBase Region定位
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-07-24T16:22:33+08:00" content="2016-07-24">
-              2016-07-24
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/HBase/" itemprop="url" rel="index">
-                    <span itemprop="name">HBase</span>
-                  </a>
-                </span>
-
-                
-                
-                  ， 
-                
-
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/HBase/源码分析/" itemprop="url" rel="index">
-                    <span itemprop="name">源码分析</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-
-          
-          
-
-          
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="什么时候需要Region定位？"><a href="#什么时候需要Region定位？" class="headerlink" title="什么时候需要Region定位？"></a>什么时候需要Region定位？</h2><p>　　<strong>每个RegionServer包含多个的Region，每个Region包含一定范围内的行。</strong>HBase client执行Get、Put等操作，都需要定位Region，与Region所在的RegionServer建立连接，进行RPC调用。  </p>
-<h2 id="Region定位过程"><a href="#Region定位过程" class="headerlink" title="Region定位过程"></a>Region定位过程</h2><h3 id="Catalog-Table"><a href="#Catalog-Table" class="headerlink" title="Catalog Table"></a>Catalog Table</h3><p>HBase有两个特殊的表<strong>-ROOT-</strong>和<strong>.MEAT.</strong>。  </p>
-<ul>
-<li>-ROOT-保存了.META.表的位置。-ROOT-的位置信息存储在Zookeeper中。  </li>
-<li>.MEAT.保存了一系列Region信息。</li>
-</ul>
-<h3 id="一次查找流程"><a href="#一次查找流程" class="headerlink" title="一次查找流程"></a>一次查找流程</h3><ol>
-<li>Client从Zookeeper查找-ROOT-所在的RegionServer为RS1  </li>
-<li>Client与RS1建立通信，查找-ROOT-，找到rowkey所在的.META.的RegionServer为RS2  </li>
-<li>Client与RS2建立通信，查找-META-，找到rowkey所属Region的RegionServer为RS3  </li>
-</ol>
-<h3 id="缓存"><a href="#缓存" class="headerlink" title="缓存"></a>缓存</h3><p>Client可以缓存Region location。</p>
-<h2 id="源码分析"><a href="#源码分析" class="headerlink" title="源码分析"></a>源码分析</h2><h3 id="HConnectionImplementation的locateRegion方法："><a href="#HConnectionImplementation的locateRegion方法：" class="headerlink" title="HConnectionImplementation的locateRegion方法："></a>HConnectionImplementation的locateRegion方法：</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">private</span> HRegionLocation <span class="title">locateRegion</span><span class="params">(<span class="keyword">final</span> <span class="keyword">byte</span> [] tableName,</span></span></div><div class="line">      <span class="keyword">final</span> <span class="keyword">byte</span> [] row, <span class="keyword">boolean</span> useCache, <span class="keyword">boolean</span> retry)</div><div class="line">    <span class="keyword">throws</span> IOException &#123;</div><div class="line">      <span class="keyword">if</span> (<span class="keyword">this</span>.closed) <span class="keyword">throw</span> <span class="keyword">new</span> IOException(toString() + <span class="string">" closed"</span>);</div><div class="line">      <span class="keyword">if</span> (tableName == <span class="keyword">null</span> || tableName.length == <span class="number">0</span>) &#123;</div><div class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(</div><div class="line">            <span class="string">"table name cannot be null or zero length"</span>);</div><div class="line">      &#125;</div><div class="line">      ensureZookeeperTrackers();</div><div class="line">      <span class="keyword">if</span> (Bytes.equals(tableName, HConstants.ROOT_TABLE_NAME)) &#123;</div><div class="line">		<span class="comment">//RootRegionTracker 监测保存在zookeeper中的-ROOT-所在的RegionServer</span></div><div class="line">		<span class="comment">//如果tableName为-ROOT-，则通过RootRegionTracker获得-ROOT-所在的RegionServer</span></div><div class="line">        <span class="keyword">try</span> &#123;</div><div class="line">          ServerName servername = <span class="keyword">this</span>.rootRegionTracker.waitRootRegionLocation(<span class="keyword">this</span>.rpcTimeout);</div><div class="line">          LOG.debug(<span class="string">"Looked up root region location, connection="</span> + <span class="keyword">this</span> +</div><div class="line">            <span class="string">"; serverName="</span> + ((servername == <span class="keyword">null</span>)? <span class="string">""</span>: servername.toString()));</div><div class="line">          <span class="keyword">if</span> (servername == <span class="keyword">null</span>) <span class="keyword">return</span> <span class="keyword">null</span>;</div><div class="line">          <span class="keyword">return</span> <span class="keyword">new</span> HRegionLocation(HRegionInfo.ROOT_REGIONINFO,</div><div class="line">            servername.getHostname(), servername.getPort());</div><div class="line">        &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</div><div class="line">          Thread.currentThread().interrupt();</div><div class="line">          <span class="keyword">return</span> <span class="keyword">null</span>;</div><div class="line">        &#125;</div><div class="line">      &#125; <span class="keyword">else</span> <span class="keyword">if</span> (Bytes.equals(tableName, HConstants.META_TABLE_NAME)) &#123;</div><div class="line">		<span class="comment">//如果tableName为-META-，则通过调用locateRegionInMeta在-ROOT-表中找到META表所在RS</span></div><div class="line">        <span class="keyword">return</span> locateRegionInMeta(HConstants.ROOT_TABLE_NAME, tableName, row,</div><div class="line">            useCache, metaRegionLock, retry);</div><div class="line">      &#125; <span class="keyword">else</span> &#123;</div><div class="line">        <span class="comment">// Region not in the cache - have to go to the meta RS</span></div><div class="line">		<span class="comment">//如果tableName为普通表，则通过调用locateRegionInMeta在META表中找到tableName所在RS</span></div><div class="line">        <span class="keyword">return</span> locateRegionInMeta(HConstants.META_TABLE_NAME, tableName, row,</div><div class="line">            useCache, userRegionLock, retry);</div><div class="line">      &#125;</div><div class="line">    &#125;</div></pre></td></tr></table></figure>
-<h4 id="locateRegion方法理解："><a href="#locateRegion方法理解：" class="headerlink" title="locateRegion方法理解："></a>locateRegion方法理解：</h4><ol>
-<li>RootRegionTracker 监测保存在zookeeper中的-ROOT-所在的RegionServer  </li>
-<li>如果tableName为-ROOT-，则通过RootRegionTracker获得-ROOT-所在的RegionServer  </li>
-<li>如果tableName为-META-，则通过调用locateRegionInMeta在-ROOT-表中找到META表所在RegionServer</li>
-<li>如果tableName为普通表，则通过调用locateRegionInMeta在META表中找到tableName所在RegionServer  </li>
-</ol>
-<h3 id="HConnectionImplementation的locateRegionInMeta方法"><a href="#HConnectionImplementation的locateRegionInMeta方法" class="headerlink" title="HConnectionImplementation的locateRegionInMeta方法"></a>HConnectionImplementation的locateRegionInMeta方法</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div><div class="line">106</div><div class="line">107</div><div class="line">108</div><div class="line">109</div><div class="line">110</div><div class="line">111</div><div class="line">112</div><div class="line">113</div><div class="line">114</div><div class="line">115</div><div class="line">116</div><div class="line">117</div><div class="line">118</div><div class="line">119</div><div class="line">120</div><div class="line">121</div><div class="line">122</div><div class="line">123</div><div class="line">124</div><div class="line">125</div><div class="line">126</div><div class="line">127</div><div class="line">128</div><div class="line">129</div><div class="line">130</div><div class="line">131</div><div class="line">132</div><div class="line">133</div><div class="line">134</div><div class="line">135</div><div class="line">136</div><div class="line">137</div><div class="line">138</div><div class="line">139</div><div class="line">140</div><div class="line">141</div><div class="line">142</div><div class="line">143</div><div class="line">144</div><div class="line">145</div><div class="line">146</div><div class="line">147</div><div class="line">148</div><div class="line">149</div><div class="line">150</div><div class="line">151</div><div class="line">152</div><div class="line">153</div><div class="line">154</div><div class="line">155</div><div class="line">156</div><div class="line">157</div><div class="line">158</div><div class="line">159</div><div class="line">160</div><div class="line">161</div><div class="line">162</div><div class="line">163</div><div class="line">164</div></pre></td><td class="code"><pre><div class="line"> <span class="function"><span class="keyword">private</span> HRegionLocation <span class="title">locateRegionInMeta</span><span class="params">(<span class="keyword">final</span> <span class="keyword">byte</span> [] parentTable,</span></span></div><div class="line">   <span class="keyword">final</span> <span class="keyword">byte</span> [] tableName, <span class="keyword">final</span> <span class="keyword">byte</span> [] row, <span class="keyword">boolean</span> useCache,</div><div class="line">   Object regionLockObject, <span class="keyword">boolean</span> retry)</div><div class="line"> <span class="keyword">throws</span> IOException &#123;</div><div class="line">   HRegionLocation location;</div><div class="line">   <span class="comment">// If we are supposed to be using the cache, look in the cache to see if</span></div><div class="line">   <span class="comment">// we already have the region.</span></div><div class="line"><span class="comment">// 如果使用缓存的话，尝试从缓存中获取RegionServer的位置</span></div><div class="line">   <span class="keyword">if</span> (useCache) &#123;</div><div class="line">     location = getCachedLocation(tableName, row);</div><div class="line">     <span class="keyword">if</span> (location != <span class="keyword">null</span>) &#123;</div><div class="line">       <span class="keyword">return</span> location;</div><div class="line">     &#125;</div><div class="line">   &#125;</div><div class="line"></div><div class="line">   <span class="keyword">int</span> localNumRetries = retry ? numRetries : <span class="number">1</span>;</div><div class="line">   <span class="comment">// build the key of the meta region we should be looking for.</span></div><div class="line">   <span class="comment">// the extra 9's on the end are necessary to allow "exact" matches</span></div><div class="line">   <span class="comment">// without knowing the precise region names.</span></div><div class="line">   <span class="keyword">byte</span> [] metaKey = HRegionInfo.createRegionName(tableName, row,</div><div class="line">     HConstants.NINES, <span class="keyword">false</span>);</div><div class="line"></div><div class="line"><span class="comment">//重试机制</span></div><div class="line">   <span class="keyword">for</span> (<span class="keyword">int</span> tries = <span class="number">0</span>; <span class="keyword">true</span>; tries++) &#123;</div><div class="line">     <span class="keyword">if</span> (tries &gt;= localNumRetries) &#123;</div><div class="line">       <span class="keyword">throw</span> <span class="keyword">new</span> NoServerForRegionException(<span class="string">"Unable to find region for "</span></div><div class="line">         + Bytes.toStringBinary(row) + <span class="string">" after "</span> + numRetries + <span class="string">" tries."</span>);</div><div class="line">     &#125;</div><div class="line"></div><div class="line">     HRegionLocation metaLocation = <span class="keyword">null</span>;</div><div class="line">     <span class="keyword">try</span> &#123;</div><div class="line">       <span class="comment">// locate the root or meta region</span></div><div class="line"> <span class="comment">//递归找到上一层表(root或者meta)所在RegionServer位置</span></div><div class="line">       metaLocation = locateRegion(parentTable, metaKey, <span class="keyword">true</span>, <span class="keyword">false</span>);</div><div class="line">       <span class="comment">// If null still, go around again.</span></div><div class="line">       <span class="keyword">if</span> (metaLocation == <span class="keyword">null</span>) <span class="keyword">continue</span>;</div><div class="line">       HRegionInterface server =</div><div class="line">         getHRegionConnection(metaLocation.getHostname(), metaLocation.getPort());</div><div class="line"></div><div class="line">       Result regionInfoRow = <span class="keyword">null</span>;</div><div class="line">       <span class="keyword">if</span> (useCache) &#123;</div><div class="line"></div><div class="line">         <span class="keyword">if</span> (Bytes.equals(parentTable, HConstants.META_TABLE_NAME)</div><div class="line">             &amp;&amp; (getRegionCachePrefetch(tableName))) &#123;</div><div class="line">           <span class="comment">// This block guards against two threads trying to load the meta</span></div><div class="line">           <span class="comment">// region at the same time. The first will load the meta region and</span></div><div class="line">           <span class="comment">// the second will use the value that the first one found.</span></div><div class="line">  <span class="comment">//有可能其他线程缓存了meta表的位置</span></div><div class="line">           <span class="keyword">synchronized</span> (regionLockObject) &#123;</div><div class="line">             <span class="comment">// Check the cache again for a hit in case some other thread made the</span></div><div class="line">             <span class="comment">// same query while we were waiting on the lock.</span></div><div class="line">             location = getCachedLocation(tableName, row);</div><div class="line">             <span class="keyword">if</span> (location != <span class="keyword">null</span>) &#123;</div><div class="line">               <span class="keyword">return</span> location;</div><div class="line">             &#125;</div><div class="line">             <span class="comment">// If the parent table is META, we may want to pre-fetch some</span></div><div class="line">             <span class="comment">// region info into the global region cache for this table.</span></div><div class="line">             prefetchRegionCache(tableName, row);</div><div class="line">           &#125;</div><div class="line">         &#125;</div><div class="line">         location = getCachedLocation(tableName, row);</div><div class="line">         <span class="keyword">if</span> (location != <span class="keyword">null</span>) &#123;</div><div class="line">           <span class="keyword">return</span> location;</div><div class="line">         &#125;</div><div class="line">       &#125; <span class="keyword">else</span> &#123;</div><div class="line">         <span class="comment">// If we are not supposed to be using the cache, delete any existing cached location</span></div><div class="line">         <span class="comment">// so it won't interfere.</span></div><div class="line">         deleteCachedLocation(tableName, row);</div><div class="line">       &#125;</div><div class="line"></div><div class="line">       <span class="comment">// Query the root or meta region for the location of the meta region</span></div><div class="line"> <span class="comment">//查找RegionServer位置</span></div><div class="line">       regionInfoRow = server.getClosestRowBefore(</div><div class="line">       metaLocation.getRegionInfo().getRegionName(), metaKey,</div><div class="line">       HConstants.CATALOG_FAMILY);</div><div class="line"></div><div class="line">       <span class="keyword">if</span> (regionInfoRow == <span class="keyword">null</span>) &#123;</div><div class="line">         <span class="keyword">throw</span> <span class="keyword">new</span> TableNotFoundException(Bytes.toString(tableName));</div><div class="line">       &#125;</div><div class="line">       <span class="keyword">byte</span> [] value = regionInfoRow.getValue(HConstants.CATALOG_FAMILY,</div><div class="line">           HConstants.REGIONINFO_QUALIFIER);</div><div class="line">       <span class="keyword">if</span> (value == <span class="keyword">null</span> || value.length == <span class="number">0</span>) &#123;</div><div class="line">         <span class="keyword">throw</span> <span class="keyword">new</span> IOException(<span class="string">"HRegionInfo was null or empty in "</span> +</div><div class="line">           Bytes.toString(parentTable) + <span class="string">", row="</span> + regionInfoRow);</div><div class="line">       &#125;</div><div class="line">       <span class="comment">// convert the row result into the HRegionLocation we need!</span></div><div class="line">       HRegionInfo regionInfo = (HRegionInfo) Writables.getWritable(</div><div class="line">           value, <span class="keyword">new</span> HRegionInfo());</div><div class="line">       <span class="comment">// possible we got a region of a different table...</span></div><div class="line">       <span class="keyword">if</span> (!Bytes.equals(regionInfo.getTableName(), tableName)) &#123;</div><div class="line">         <span class="keyword">throw</span> <span class="keyword">new</span> TableNotFoundException(</div><div class="line">               <span class="string">"Table '"</span> + Bytes.toString(tableName) + <span class="string">"' was not found, got: "</span> +</div><div class="line">               Bytes.toString(regionInfo.getTableName()) + <span class="string">"."</span>);</div><div class="line">       &#125;</div><div class="line">       <span class="keyword">if</span> (regionInfo.isSplit()) &#123;</div><div class="line">         <span class="keyword">throw</span> <span class="keyword">new</span> RegionOfflineException(<span class="string">"the only available region for"</span> +</div><div class="line">           <span class="string">" the required row is a split parent,"</span> +</div><div class="line">           <span class="string">" the daughters should be online soon: "</span> +</div><div class="line">           regionInfo.getRegionNameAsString());</div><div class="line">       &#125;</div><div class="line">       <span class="keyword">if</span> (regionInfo.isOffline()) &#123;</div><div class="line">         <span class="keyword">throw</span> <span class="keyword">new</span> RegionOfflineException(<span class="string">"the region is offline, could"</span> +</div><div class="line">           <span class="string">" be caused by a disable table call: "</span> +</div><div class="line">           regionInfo.getRegionNameAsString());</div><div class="line">       &#125;</div><div class="line"></div><div class="line">       value = regionInfoRow.getValue(HConstants.CATALOG_FAMILY,</div><div class="line">           HConstants.SERVER_QUALIFIER);</div><div class="line">       String hostAndPort = <span class="string">""</span>;</div><div class="line">       <span class="keyword">if</span> (value != <span class="keyword">null</span>) &#123;</div><div class="line">         hostAndPort = Bytes.toString(value);</div><div class="line">       &#125;</div><div class="line">       <span class="keyword">if</span> (hostAndPort.equals(<span class="string">""</span>)) &#123;</div><div class="line">         <span class="keyword">throw</span> <span class="keyword">new</span> NoServerForRegionException(<span class="string">"No server address listed "</span> +</div><div class="line">           <span class="string">"in "</span> + Bytes.toString(parentTable) + <span class="string">" for region "</span> +</div><div class="line">           regionInfo.getRegionNameAsString() + <span class="string">" containing row "</span> +</div><div class="line">           Bytes.toStringBinary(row));</div><div class="line">       &#125;</div><div class="line"></div><div class="line">       <span class="comment">// Instantiate the location</span></div><div class="line">       String hostname = Addressing.parseHostname(hostAndPort);</div><div class="line">       <span class="keyword">int</span> port = Addressing.parsePort(hostAndPort);</div><div class="line">       location = <span class="keyword">new</span> HRegionLocation(regionInfo, hostname, port);</div><div class="line"> </div><div class="line"> <span class="comment">//缓存location</span></div><div class="line">       cacheLocation(tableName, location);</div><div class="line"></div><div class="line">       <span class="keyword">return</span> location;</div><div class="line">     &#125; <span class="keyword">catch</span> (TableNotFoundException e) &#123;</div><div class="line">       <span class="comment">// if we got this error, probably means the table just plain doesn't</span></div><div class="line">       <span class="comment">// exist. rethrow the error immediately. this should always be coming</span></div><div class="line">       <span class="comment">// from the HTable constructor.</span></div><div class="line">       <span class="keyword">throw</span> e;</div><div class="line">     &#125; <span class="keyword">catch</span> (IOException e) &#123;</div><div class="line">       <span class="keyword">if</span> (e <span class="keyword">instanceof</span> RemoteException) &#123;</div><div class="line">         e = RemoteExceptionHandler.decodeRemoteException((RemoteException) e);</div><div class="line">       &#125;</div><div class="line">       <span class="keyword">if</span> (tries &lt; numRetries - <span class="number">1</span>) &#123;</div><div class="line">         <span class="keyword">if</span> (LOG.isDebugEnabled()) &#123;</div><div class="line">           LOG.debug(<span class="string">"locateRegionInMeta parentTable="</span> +</div><div class="line">             Bytes.toString(parentTable) + <span class="string">", metaLocation="</span> +</div><div class="line">             ((metaLocation == <span class="keyword">null</span>)? <span class="string">"null"</span>: <span class="string">"&#123;"</span> + metaLocation + <span class="string">"&#125;"</span>) +</div><div class="line">             <span class="string">", attempt="</span> + tries + <span class="string">" of "</span> +</div><div class="line">             <span class="keyword">this</span>.numRetries + <span class="string">" failed; retrying after sleep of "</span> +</div><div class="line">             ConnectionUtils.getPauseTime(<span class="keyword">this</span>.pause, tries) + <span class="string">" because: "</span> + e.getMessage());</div><div class="line">         &#125;</div><div class="line">       &#125; <span class="keyword">else</span> &#123;</div><div class="line">         <span class="keyword">throw</span> e;</div><div class="line">       &#125;</div><div class="line">       <span class="comment">// Only relocate the parent region if necessary</span></div><div class="line">       <span class="keyword">if</span>(!(e <span class="keyword">instanceof</span> RegionOfflineException ||</div><div class="line">           e <span class="keyword">instanceof</span> NoServerForRegionException)) &#123;</div><div class="line">         relocateRegion(parentTable, metaKey);</div><div class="line">       &#125;</div><div class="line">     &#125;</div><div class="line">     <span class="keyword">try</span>&#123;</div><div class="line">       Thread.sleep(ConnectionUtils.getPauseTime(<span class="keyword">this</span>.pause, tries));</div><div class="line">     &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</div><div class="line">       Thread.currentThread().interrupt();</div><div class="line">       <span class="keyword">throw</span> <span class="keyword">new</span> IOException(<span class="string">"Giving up trying to location region in "</span> +</div><div class="line">         <span class="string">"meta: thread is interrupted."</span>);</div><div class="line">     &#125;</div><div class="line">   &#125;</div><div class="line"> &#125;</div></pre></td></tr></table></figure>
-<h4 id="locateRegionInMeta方法理解"><a href="#locateRegionInMeta方法理解" class="headerlink" title="locateRegionInMeta方法理解"></a>locateRegionInMeta方法理解</h4><p>1.缓存<br>2.递归查找<br>3.重试机制  </p>
-<p>###缓存实现</p>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/07/24/HBase总体架构/" itemprop="url">
-                  HBase总体架构
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-07-24T15:01:21+08:00" content="2016-07-24">
-              2016-07-24
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/HBase/" itemprop="url" rel="index">
-                    <span itemprop="name">HBase</span>
-                  </a>
-                </span>
-
-                
-                
-                  ， 
-                
-
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/HBase/HBase架构/" itemprop="url" rel="index">
-                    <span itemprop="name">HBase架构</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-
-          
-          
-
-          
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="架构图"><a href="#架构图" class="headerlink" title="架构图"></a>架构图</h2><p><img src="https://github.com/TinyR/images/blob/master/HBase/overview.png?raw=true" alt="HBase架构图"></p>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/07/24/HBase概念视图与物理视图/" itemprop="url">
-                  HBase概念视图与物理视图
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-07-24T14:34:27+08:00" content="2016-07-24">
-              2016-07-24
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/HBase/" itemprop="url" rel="index">
-                    <span itemprop="name">HBase</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-
-          
-          
-
-          
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>建议先看上一篇：HBase数据模型  </p>
-<p>采用HBase官方文档的示例。  </p>
-<h2 id="概念视图"><a href="#概念视图" class="headerlink" title="概念视图:"></a>概念视图:</h2><p>表webtable:<br><img src="https://github.com/TinyR/images/blob/master/HBase/conceptual-view.PNG?raw=true" alt="HBase概念视图">  </p>
-<h2 id="物理视图："><a href="#物理视图：" class="headerlink" title="物理视图："></a>物理视图：</h2><p>anchor列族:<br><img src="https://github.com/TinyR/images/blob/master/HBase/anchor.PNG?raw=true" alt="anchor列族"></p>
-<p>contents列族：<br><img src="https://github.com/TinyR/images/blob/master/HBase/contents.PNG?raw=true" alt="contents列族">   </p>
-<p>参考：<br><a href="http://hbase.apache.org/book.html#datamodel" target="_blank" rel="external">HBase官方文档，Data Model部分</a></p>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/07/24/HBase数据模型/" itemprop="url">
-                  HBase数据模型
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-07-24T13:45:55+08:00" content="2016-07-24">
-              2016-07-24
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/HBase/" itemprop="url" rel="index">
-                    <span itemprop="name">HBase</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-
-          
-          
-
-          
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>　　我觉得关于HBase、Bigtable数据模型的最好阐述来源于论文《<em>Bigtable: A Distributed Storage System for Structured Data</em>》section2 Data Model:</p>
-<blockquote>
-<p>A Bigtable is a sparse, distributed, persistent multidimensional sorted map.
-　　</p>
-</blockquote>
-<p>　　关键词:<strong><em>sparse distributed persistent multi-dimensional sorted map</em></strong><br>　　以上几个关键词的详细阐述可参考博客<a href="http://jimbojw.com/wiki/index.php?title=Understanding_Hbase_and_BigTable" target="_blank" rel="external">Understanting HBase and BigTable</a>。<br>　　Bigtable论文继续阐述:</p>
-<blockquote>
-<p>The map is indexed by a row key, column key, and a timestamp; each value in the map is an uninterpreted array of bytes.</p>
-<p>(row:string,column:string,time:int64) -&gt; string</p>
-</blockquote>
-<p>　　HBase使用的数据模型与Bigtable类似。<br>　　了解了HBase、Bigtable的数据模型，再去看HBase的概念图与物理视图，便能很好地理解。</p>
-<p>　　参考:<br>　　<em>Bigtable: A Distributed Storage System for Structured Data</em><br>　　<a href="http://jimbojw.com/wiki/index.php?title=Understanding_Hbase_and_BigTable" target="_blank" rel="external">Understanting HBase and BigTable</a><br>　　<a href="http://hbase.apache.org/book.html#datamodel" target="_blank" rel="external">HBase官方文档，Data Model部分</a></p>
+<h4 id="数据结构"><a href="#数据结构" class="headerlink" title="数据结构"></a>数据结构</h4><p><code>Action<r> action = new Action<r>(row, i);</r></r></code><br>MultiAction：<br>成员变量：<br><figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div><div class="line">106</div><div class="line">107</div><div class="line">108</div><div class="line">109</div><div class="line">110</div><div class="line">111</div><div class="line">112</div><div class="line">113</div><div class="line">114</div><div class="line">115</div><div class="line">116</div><div class="line">117</div><div class="line">118</div><div class="line">119</div><div class="line">120</div><div class="line">121</div><div class="line">122</div><div class="line">123</div><div class="line">124</div><div class="line">125</div><div class="line">126</div><div class="line">127</div><div class="line">128</div></pre></td><td class="code"><pre><div class="line">  // map of regions to lists of puts/gets/deletes for that region.</div><div class="line">  public Map&lt;byte[], List&lt;Action&lt;R&gt;&gt;&gt; actions =</div><div class="line">    new TreeMap&lt;byte[], List&lt;Action&lt;R&gt;&gt;&gt;(</div><div class="line">      Bytes.BYTES_COMPARATOR);</div><div class="line">```   </div><div class="line">**有序的Map**  </div><div class="line">- key:regionName  </div><div class="line">- value:一系列Get/Put/Delete操作  </div><div class="line"></div><div class="line">processBatchCallback中使用的数据结构：  </div><div class="line">Map&lt;HRegionLocation,MultiAction&lt;R&gt;&gt; actionByServer = new HashMap&lt;HRegionLocation, MultionAction&lt;R&gt;&gt;();  </div><div class="line">- key: HRegionLocation，对应一个RegionServer  </div><div class="line">- value: 一系列Region及其操作</div><div class="line"></div><div class="line">#### processBatchBack源码</div><div class="line">```java</div><div class="line">public &lt;R&gt; void processBatchCallback(</div><div class="line">        List&lt;? extends Row&gt; list,</div><div class="line">        byte[] tableName,</div><div class="line">        ExecutorService pool,</div><div class="line">        Object[] results,</div><div class="line">        Batch.Callback&lt;R&gt; callback)</div><div class="line">    throws IOException, InterruptedException &#123;</div><div class="line">      </div><div class="line">      //一些检查工作 </div><div class="line">      if (results.length != list.size()) &#123;</div><div class="line">        throw new IllegalArgumentException(</div><div class="line">            "argument results must be the same size as argument list");</div><div class="line">      &#125;</div><div class="line">      if (list.isEmpty()) &#123;</div><div class="line">        return;</div><div class="line">      &#125;</div><div class="line">		</div><div class="line">	  //为后面工作做准备</div><div class="line">      HRegionLocation [] lastServers = new HRegionLocation[results.length];</div><div class="line">      List&lt;Row&gt; workingList = new ArrayList&lt;Row&gt;(list);</div><div class="line">      boolean retry = true;</div><div class="line">      // count that helps presize actions array</div><div class="line">      int actionCount = 0;</div><div class="line">	  </div><div class="line">      //可能重试</div><div class="line">      for (int tries = 0; tries &lt; numRetries &amp;&amp; retry; ++tries) &#123;</div><div class="line">		// ...</div><div class="line">		</div><div class="line">        // 1.按RegionServer分类Get/Put/Delete操作</div><div class="line">        Map&lt;HRegionLocation, MultiAction&lt;R&gt;&gt; actionsByServer =</div><div class="line">          new HashMap&lt;HRegionLocation, MultiAction&lt;R&gt;&gt;();</div><div class="line">        for (int i = 0; i &lt; workingList.size(); i++) &#123;</div><div class="line">          Row row = workingList.get(i);</div><div class="line">          if (row != null) &#123;</div><div class="line">            HRegionLocation loc = locateRegion(tableName, row.getRow());</div><div class="line">            byte[] regionName = loc.getRegionInfo().getRegionName();</div><div class="line"></div><div class="line">            MultiAction&lt;R&gt; actions = actionsByServer.get(loc);</div><div class="line">            if (actions == null) &#123;</div><div class="line">              actions = new MultiAction&lt;R&gt;();</div><div class="line">              actionsByServer.put(loc, actions);</div><div class="line">            &#125;</div><div class="line"></div><div class="line">            Action&lt;R&gt; action = new Action&lt;R&gt;(row, i);</div><div class="line">            lastServers[i] = loc;</div><div class="line">            actions.add(regionName, action);</div><div class="line">          &#125;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        // 2.发送请求</div><div class="line"></div><div class="line">        Map&lt;HRegionLocation, Future&lt;MultiResponse&gt;&gt; futures =</div><div class="line">            new HashMap&lt;HRegionLocation, Future&lt;MultiResponse&gt;&gt;(</div><div class="line">                actionsByServer.size());</div><div class="line"></div><div class="line">        for (Entry&lt;HRegionLocation, MultiAction&lt;R&gt;&gt; e: actionsByServer.entrySet()) &#123;</div><div class="line">          futures.put(e.getKey(), pool.submit(createCallable(e.getKey(), e.getValue(), tableName)));</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        // 3.收集failure和success信息</div><div class="line"></div><div class="line">        for (Entry&lt;HRegionLocation, Future&lt;MultiResponse&gt;&gt; responsePerServer</div><div class="line">             : futures.entrySet()) &#123;</div><div class="line">          // ...</div><div class="line">        &#125;</div><div class="line"></div><div class="line">		// 4. 找到failure，加入到workingList，重试</div><div class="line"></div><div class="line">        retry = false;</div><div class="line">        workingList.clear();</div><div class="line">        actionCount = 0;</div><div class="line">		</div><div class="line">        for (int i = 0; i &lt; results.length; i++) &#123;</div><div class="line">          // if null (fail) or instanceof Throwable &amp;&amp; not instanceof DNRIOE</div><div class="line">          // then retry that row. else dont.</div><div class="line">          if (results[i] == null ||</div><div class="line">              (results[i] instanceof Throwable &amp;&amp;</div><div class="line">                  !(results[i] instanceof DoNotRetryIOException))) &#123;</div><div class="line"></div><div class="line">            retry = true;</div><div class="line">            actionCount++;</div><div class="line">            Row row = list.get(i);</div><div class="line">            workingList.add(row);</div><div class="line">            deleteCachedLocation(tableName, row.getRow());</div><div class="line">          &#125; else &#123;</div><div class="line">            if (results[i] != null &amp;&amp; results[i] instanceof Throwable) &#123;</div><div class="line">              actionCount++;</div><div class="line">            &#125;</div><div class="line">            // add null to workingList, so the order remains consistent with the original list argument.</div><div class="line">            workingList.add(null);</div><div class="line">          &#125;</div><div class="line">        &#125;</div><div class="line">      &#125;</div><div class="line"></div><div class="line">      List&lt;Throwable&gt; exceptions = new ArrayList&lt;Throwable&gt;(actionCount);</div><div class="line">      List&lt;Row&gt; actions = new ArrayList&lt;Row&gt;(actionCount);</div><div class="line">      List&lt;String&gt; addresses = new ArrayList&lt;String&gt;(actionCount);</div><div class="line"></div><div class="line">      for (int i = 0 ; i &lt; results.length; i++) &#123;</div><div class="line">        if (results[i] == null || results[i] instanceof Throwable) &#123;</div><div class="line">          exceptions.add((Throwable)results[i]);</div><div class="line">          actions.add(list.get(i));</div><div class="line">          addresses.add(lastServers[i].getHostnamePort());</div><div class="line">        &#125;</div><div class="line">      &#125;</div><div class="line"></div><div class="line">      if (!exceptions.isEmpty()) &#123;</div><div class="line">        throw new RetriesExhaustedWithDetailsException(exceptions,</div><div class="line">            actions,</div><div class="line">            addresses);</div><div class="line">      &#125;</div><div class="line">    &#125;</div></pre></td></tr></table></figure></p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p>HBase-0.94.27源码</p>
 
           
         
@@ -873,6 +1327,10 @@
   </section>
 
   
+  <nav class="pagination">
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right"></i></a>
+  </nav>
+
 
 
           </div>
@@ -911,7 +1369,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">5</span>
+              <span class="site-state-item-count">14</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>

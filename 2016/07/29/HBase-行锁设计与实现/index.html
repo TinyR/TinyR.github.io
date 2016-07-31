@@ -1,0 +1,613 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="HBase," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="HBase保证行级别的修改的原子性。HBase行锁实现基于HBase 0.94现版本已经有所变化
+HRegion
+lockedRows:存放rowKey与rowlock的键值对。lockIds:存放lock id与rowKey的键值对。lockIdGenerator:用于生成lock id
+获取锁　　obtainRowLock(final byte [] row) 调用 internalObtai">
+<meta property="og:type" content="article">
+<meta property="og:title" content="HBase 行锁设计与实现">
+<meta property="og:url" content="http://yoursite.com/2016/07/29/HBase-行锁设计与实现/index.html">
+<meta property="og:site_name" content="RNA">
+<meta property="og:description" content="HBase保证行级别的修改的原子性。HBase行锁实现基于HBase 0.94现版本已经有所变化
+HRegion
+lockedRows:存放rowKey与rowlock的键值对。lockIds:存放lock id与rowKey的键值对。lockIdGenerator:用于生成lock id
+获取锁　　obtainRowLock(final byte [] row) 调用 internalObtai">
+<meta property="og:image" content="https://github.com/TinyR/images/blob/master/HBase/HRegion_rowLock.PNG?raw=true">
+<meta property="og:updated_time" content="2016-07-29T13:23:41.246Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="HBase 行锁设计与实现">
+<meta name="twitter:description" content="HBase保证行级别的修改的原子性。HBase行锁实现基于HBase 0.94现版本已经有所变化
+HRegion
+lockedRows:存放rowKey与rowlock的键值对。lockIds:存放lock id与rowKey的键值对。lockIdGenerator:用于生成lock id
+获取锁　　obtainRowLock(final byte [] row) 调用 internalObtai">
+<meta name="twitter:image" content="https://github.com/TinyR/images/blob/master/HBase/HRegion_rowLock.PNG?raw=true">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: '博主'
+    }
+  };
+</script>
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2016/07/29/HBase-行锁设计与实现/"/>
+
+  <title> HBase 行锁设计与实现 | RNA </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">RNA</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle"></p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                HBase 行锁设计与实现
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-07-29T15:49:42+08:00" content="2016-07-29">
+              2016-07-29
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/HBase/" itemprop="url" rel="index">
+                    <span itemprop="name">HBase</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="HBase保证行级别的修改的原子性。"><a href="#HBase保证行级别的修改的原子性。" class="headerlink" title="HBase保证行级别的修改的原子性。"></a>HBase保证行级别的修改的原子性。</h2><h2 id="HBase行锁实现"><a href="#HBase行锁实现" class="headerlink" title="HBase行锁实现"></a>HBase行锁实现</h2><p>基于HBase 0.94<br>现版本已经有所变化</p>
+<h3 id="HRegion"><a href="#HRegion" class="headerlink" title="HRegion"></a>HRegion</h3><p><img src="https://github.com/TinyR/images/blob/master/HBase/HRegion_rowLock.PNG?raw=true" alt="HRegion rowLock"></p>
+<p>lockedRows:存放rowKey与rowlock的键值对。<br>lockIds:存放lock id与rowKey的键值对。<br>lockIdGenerator:用于生成lock id</p>
+<h3 id="获取锁"><a href="#获取锁" class="headerlink" title="获取锁"></a>获取锁</h3><p>　　obtainRowLock(final byte [] row) 调用 internalObtainRowLock(final HashedBytes rowKey, boolean waitForLock)</p>
+<h4 id="主要流程"><a href="#主要流程" class="headerlink" title="主要流程"></a>主要流程</h4><ol>
+<li>新建锁rowLatch</li>
+<li>循环，直到获得锁(除非!waitForLock)：rowLatch放入到lockedRows中，成功则表示获得锁，如果锁已经被其他线程获得，则重新尝试。</li>
+<li>如果获得锁成功，循环，直到生成未被使用的lock id</li>
+</ol>
+<h4 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">private</span> Integer <span class="title">internalObtainRowLock</span><span class="params">(<span class="keyword">final</span> HashedBytes rowKey, <span class="keyword">boolean</span> waitForLock)</span></span></div><div class="line">      <span class="keyword">throws</span> IOException &#123;</div><div class="line">    checkRow(rowKey.getBytes(), <span class="string">"row lock"</span>);</div><div class="line">    startRegionOperation();</div><div class="line">    <span class="keyword">try</span> &#123;</div><div class="line">		<span class="comment">// 1. 新建锁</span></div><div class="line">      CountDownLatch rowLatch = <span class="keyword">new</span> CountDownLatch(<span class="number">1</span>);</div><div class="line"></div><div class="line">      </div><div class="line">		<span class="comment">//循环，直到获得锁(除非!waitForLock)</span></div><div class="line">      <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</div><div class="line">        CountDownLatch existingLatch = lockedRows.putIfAbsent(rowKey, rowLatch);</div><div class="line">        <span class="keyword">if</span> (existingLatch == <span class="keyword">null</span>) &#123;</div><div class="line">          <span class="keyword">break</span>;</div><div class="line">        &#125; <span class="keyword">else</span> &#123;</div><div class="line">          <span class="comment">// row already locked</span></div><div class="line">          <span class="keyword">if</span> (!waitForLock) &#123;</div><div class="line">            <span class="keyword">return</span> <span class="keyword">null</span>;</div><div class="line">          &#125;</div><div class="line">          <span class="keyword">try</span> &#123;</div><div class="line">            <span class="keyword">if</span> (!existingLatch.await(<span class="keyword">this</span>.rowLockWaitDuration,</div><div class="line">                            TimeUnit.MILLISECONDS)) &#123;</div><div class="line">              <span class="keyword">throw</span> <span class="keyword">new</span> IOException(<span class="string">"Timed out on getting lock for row="</span> + rowKey);</div><div class="line">            &#125;</div><div class="line">          &#125; <span class="keyword">catch</span> (InterruptedException ie) &#123;</div><div class="line">            LOG.warn(<span class="string">"internalObtainRowLock interrupted for row="</span> + rowKey);</div><div class="line">            InterruptedIOException iie = <span class="keyword">new</span> InterruptedIOException();</div><div class="line">            iie.initCause(ie);</div><div class="line">            <span class="keyword">throw</span> iie;</div><div class="line">          &#125;</div><div class="line">        &#125;</div><div class="line">      &#125;</div><div class="line"></div><div class="line">      <span class="comment">// loop until we generate an unused lock id</span></div><div class="line">		<span class="comment">//循环，直到生成未被使用的lock id</span></div><div class="line">      <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</div><div class="line">        Integer lockId = lockIdGenerator.incrementAndGet();</div><div class="line">        HashedBytes existingRowKey = lockIds.putIfAbsent(lockId, rowKey);</div><div class="line">        <span class="keyword">if</span> (existingRowKey == <span class="keyword">null</span>) &#123;</div><div class="line">          <span class="keyword">return</span> lockId;</div><div class="line">        &#125; <span class="keyword">else</span> &#123;</div><div class="line">          <span class="comment">// lockId already in use, jump generator to a new spot</span></div><div class="line">          lockIdGenerator.set(rand.nextInt());</div><div class="line">        &#125;</div><div class="line">      &#125;</div><div class="line">    &#125; <span class="keyword">finally</span> &#123;</div><div class="line">      closeRegionOperation();</div><div class="line">    &#125;</div><div class="line">  &#125;</div></pre></td></tr></table></figure>
+<h3 id="释放锁"><a href="#释放锁" class="headerlink" title="释放锁"></a>释放锁</h3><p>releaseRowLock(final Integer lockId)</p>
+<h4 id="主要流程-1"><a href="#主要流程-1" class="headerlink" title="主要流程"></a>主要流程</h4><ol>
+<li>从lockids中删除lockid</li>
+<li>从lockedRows中删除rowLatch</li>
+<li>唤醒等待获得锁的其他线程</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line"> <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">releaseRowLock</span><span class="params">(<span class="keyword">final</span> Integer lockId)</span> </span>&#123;</div><div class="line">   <span class="keyword">if</span> (lockId == <span class="keyword">null</span>) <span class="keyword">return</span>; <span class="comment">// null lock id, do nothing</span></div><div class="line"><span class="comment">// 从lockids中删除lockid</span></div><div class="line">   HashedBytes rowKey = lockIds.remove(lockId);</div><div class="line">   <span class="keyword">if</span> (rowKey == <span class="keyword">null</span>) &#123;</div><div class="line">     LOG.warn(<span class="string">"Release unknown lockId: "</span> + lockId);</div><div class="line">     <span class="keyword">return</span>;</div><div class="line">   &#125;</div><div class="line"><span class="comment">// 从lockedRows中删除rowLatch</span></div><div class="line">   CountDownLatch rowLatch = lockedRows.remove(rowKey);</div><div class="line">   <span class="keyword">if</span> (rowLatch == <span class="keyword">null</span>) &#123;</div><div class="line">     LOG.error(<span class="string">"Releases row not locked, lockId: "</span> + lockId + <span class="string">" row: "</span></div><div class="line">         + rowKey);</div><div class="line">     <span class="keyword">return</span>;</div><div class="line">   &#125;</div><div class="line"><span class="comment">// 唤醒等待获得锁的其他线程</span></div><div class="line">   rowLatch.countDown();</div><div class="line"> &#125;</div></pre></td></tr></table></figure>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p>HBase-0.94.27源码</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/HBase/" rel="tag">#HBase</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/07/29/HBase-MVCC/" rel="next" title="HBase MVCC">
+                <i class="fa fa-chevron-left"></i> HBase MVCC
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/07/29/HBase-Bloom-filter/" rel="prev" title="HBase Bloom filter">
+                HBase Bloom filter <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/uploads/images/jfm1.jpg"
+               alt="RNA" />
+          <p class="site-author-name" itemprop="name">RNA</p>
+          <p class="site-description motion-element" itemprop="description">Welcome~</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">14</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              
+                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-name">分类</span>
+              
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">2</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#HBase保证行级别的修改的原子性。"><span class="nav-number">1.</span> <span class="nav-text">HBase保证行级别的修改的原子性。</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HBase行锁实现"><span class="nav-number">2.</span> <span class="nav-text">HBase行锁实现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#HRegion"><span class="nav-number">2.1.</span> <span class="nav-text">HRegion</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#获取锁"><span class="nav-number">2.2.</span> <span class="nav-text">获取锁</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#主要流程"><span class="nav-number">2.2.1.</span> <span class="nav-text">主要流程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#源码"><span class="nav-number">2.2.2.</span> <span class="nav-text">源码</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#释放锁"><span class="nav-number">2.3.</span> <span class="nav-text">释放锁</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#主要流程-1"><span class="nav-number">2.3.1.</span> <span class="nav-text">主要流程</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考"><span class="nav-number">3.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2016</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">RNA</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+        
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

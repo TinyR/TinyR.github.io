@@ -68,7 +68,7 @@
 <link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="HBase," />
+  <meta name="keywords" content="Hexo, NexT" />
 
 
 
@@ -84,22 +84,28 @@
 
 
 
-<meta name="description" content="我觉得关于HBase、Bigtable数据模型的最好阐述来源于论文《Bigtable: A Distributed Storage System for Structured Data》section2 Data Model:
-
-A Bigtable is a sparse, distributed, persistent multidimensional sorted map.">
+<meta name="description" content="HBase批量处理操作HBase client端批处理操作，最终通过RPC,远程调用HRegionServer的multi方法。
+HRegionServer multi(MultiAction multi)方法主要流程：
+对每个Region下面的action进行排序
+对action进行分类，delete与put放一起，最终将会调用HRegion的batchMutate方法
+其他操作比如：get,a">
 <meta property="og:type" content="article">
-<meta property="og:title" content="HBase数据模型">
-<meta property="og:url" content="http://yoursite.com/2016/07/24/HBase数据模型/index.html">
+<meta property="og:title" content="HBase 数据写入server端分析">
+<meta property="og:url" content="http://yoursite.com/2016/07/30/HBase-数据写入server端分析/index.html">
 <meta property="og:site_name" content="RNA">
-<meta property="og:description" content="我觉得关于HBase、Bigtable数据模型的最好阐述来源于论文《Bigtable: A Distributed Storage System for Structured Data》section2 Data Model:
-
-A Bigtable is a sparse, distributed, persistent multidimensional sorted map.">
-<meta property="og:updated_time" content="2016-07-25T15:44:13.862Z">
+<meta property="og:description" content="HBase批量处理操作HBase client端批处理操作，最终通过RPC,远程调用HRegionServer的multi方法。
+HRegionServer multi(MultiAction multi)方法主要流程：
+对每个Region下面的action进行排序
+对action进行分类，delete与put放一起，最终将会调用HRegion的batchMutate方法
+其他操作比如：get,a">
+<meta property="og:updated_time" content="2016-07-31T11:15:27.924Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="HBase数据模型">
-<meta name="twitter:description" content="我觉得关于HBase、Bigtable数据模型的最好阐述来源于论文《Bigtable: A Distributed Storage System for Structured Data》section2 Data Model:
-
-A Bigtable is a sparse, distributed, persistent multidimensional sorted map.">
+<meta name="twitter:title" content="HBase 数据写入server端分析">
+<meta name="twitter:description" content="HBase批量处理操作HBase client端批处理操作，最终通过RPC,远程调用HRegionServer的multi方法。
+HRegionServer multi(MultiAction multi)方法主要流程：
+对每个Region下面的action进行排序
+对action进行分类，delete与put放一起，最终将会调用HRegion的batchMutate方法
+其他操作比如：get,a">
 
 
 
@@ -120,9 +126,9 @@ A Bigtable is a sparse, distributed, persistent multidimensional sorted map.">
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2016/07/24/HBase数据模型/"/>
+  <link rel="canonical" href="http://yoursite.com/2016/07/30/HBase-数据写入server端分析/"/>
 
-  <title> HBase数据模型 | RNA </title>
+  <title> HBase 数据写入server端分析 | RNA </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -242,7 +248,7 @@ A Bigtable is a sparse, distributed, persistent multidimensional sorted map.">
             
             
               
-                HBase数据模型
+                HBase 数据写入server端分析
               
             
           </h1>
@@ -254,30 +260,11 @@ A Bigtable is a sparse, distributed, persistent multidimensional sorted map.">
               <i class="fa fa-calendar-o"></i>
             </span>
             <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-07-24T13:45:55+08:00" content="2016-07-24">
-              2016-07-24
+            <time itemprop="dateCreated" datetime="2016-07-30T12:07:02+08:00" content="2016-07-30">
+              2016-07-30
             </time>
           </span>
 
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/HBase/" itemprop="url" rel="index">
-                    <span itemprop="name">HBase</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
           
 
           
@@ -301,18 +288,23 @@ A Bigtable is a sparse, distributed, persistent multidimensional sorted map.">
       
 
       
-        <p>　　我觉得关于HBase、Bigtable数据模型的最好阐述来源于论文《<em>Bigtable: A Distributed Storage System for Structured Data</em>》section2 Data Model:</p>
-<blockquote>
-<p>A Bigtable is a sparse, distributed, persistent multidimensional sorted map.
-　　</p>
-</blockquote>
-<p>　　关键词:<strong><em>sparse distributed persistent multi-dimensional sorted map</em></strong><br>　　以上几个关键词的详细阐述可参考博客<a href="http://jimbojw.com/wiki/index.php?title=Understanding_Hbase_and_BigTable" target="_blank" rel="external">Understanting HBase and BigTable</a>。<br>　　Bigtable论文继续阐述:</p>
-<blockquote>
-<p>The map is indexed by a row key, column key, and a timestamp; each value in the map is an uninterpreted array of bytes.</p>
-<p>(row:string,column:string,time:int64) -&gt; string</p>
-</blockquote>
-<p>　　HBase使用的数据模型与Bigtable类似。<br>　　了解了HBase、Bigtable的数据模型，再去看HBase的概念图与物理视图，便能很好地理解。</p>
-<p>　　参考:<br>　　<em>Bigtable: A Distributed Storage System for Structured Data</em><br>　　<a href="http://jimbojw.com/wiki/index.php?title=Understanding_Hbase_and_BigTable" target="_blank" rel="external">Understanting HBase and BigTable</a><br>　　<a href="http://hbase.apache.org/book.html#datamodel" target="_blank" rel="external">HBase官方文档，Data Model部分</a></p>
+        <h2 id="HBase批量处理操作"><a href="#HBase批量处理操作" class="headerlink" title="HBase批量处理操作"></a>HBase批量处理操作</h2><p>HBase client端批处理操作，最终通过RPC,远程调用HRegionServer的multi方法。</p>
+<h2 id="HRegionServer-multi-MultiAction-multi-方法"><a href="#HRegionServer-multi-MultiAction-multi-方法" class="headerlink" title="HRegionServer multi(MultiAction multi)方法"></a>HRegionServer multi(MultiAction<r> multi)方法</r></h2><h3 id="主要流程："><a href="#主要流程：" class="headerlink" title="主要流程："></a>主要流程：</h3><ol>
+<li>对每个Region下面的action进行排序</li>
+<li>对action进行分类，delete与put放一起，最终将会调用HRegion的batchMutate方法</li>
+<li>其他操作比如：get,append调用其他方法</li>
+</ol>
+<h2 id="HRegion-batchMutate方法"><a href="#HRegion-batchMutate方法" class="headerlink" title="HRegion batchMutate方法"></a>HRegion batchMutate方法</h2><p>将会调用doMiniBatchMutation方法</p>
+<h2 id="HRegion-doMiniBatchMutation方法"><a href="#HRegion-doMiniBatchMutation方法" class="headerlink" title="HRegion doMiniBatchMutation方法"></a>HRegion doMiniBatchMutation方法</h2><h3 id="主要流程"><a href="#主要流程" class="headerlink" title="主要流程"></a>主要流程</h3><ol>
+<li>获得尽可能多的行锁，且至少一个。</li>
+<li>更新delete/put操作所对应keyvalue的timestamps为最新。获得最新的mvcc number作为write number.</li>
+<li>写memstore</li>
+<li>构建 WAL edit</li>
+<li>向WAL添加edit但不sync wal.</li>
+<li>释放行锁</li>
+<li>sync wal</li>
+<li>更新mvcc。</li>
+</ol>
 
       
     </div>
@@ -333,23 +325,21 @@ A Bigtable is a sparse, distributed, persistent multidimensional sorted map.">
 
     <footer class="post-footer">
       
-        <div class="post-tags">
-          
-            <a href="/tags/HBase/" rel="tag">#HBase</a>
-          
-        </div>
-      
 
       
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
+              <a href="/2016/07/30/HBase-Put操作client端分析/" rel="next" title="HBase Put操作client端分析">
+                <i class="fa fa-chevron-left"></i> HBase Put操作client端分析
+              </a>
+            
           </div>
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2016/07/24/HBase概念视图与物理视图/" rel="prev" title="HBase概念视图与物理视图">
-                HBase概念视图与物理视图 <i class="fa fa-chevron-right"></i>
+              <a href="/2016/07/30/HBase-MemStore/" rel="prev" title="HBase MemStore">
+                HBase MemStore <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -464,7 +454,7 @@ A Bigtable is a sparse, distributed, persistent multidimensional sorted map.">
               
             
             
-              <p class="post-toc-empty">此文章未包含目录</p>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#HBase批量处理操作"><span class="nav-number">1.</span> <span class="nav-text">HBase批量处理操作</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HRegionServer-multi-MultiAction-multi-方法"><span class="nav-number">2.</span> <span class="nav-text">HRegionServer multi(MultiAction multi)方法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#主要流程："><span class="nav-number">2.1.</span> <span class="nav-text">主要流程：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HRegion-batchMutate方法"><span class="nav-number">3.</span> <span class="nav-text">HRegion batchMutate方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HRegion-doMiniBatchMutation方法"><span class="nav-number">4.</span> <span class="nav-text">HRegion doMiniBatchMutation方法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#主要流程"><span class="nav-number">4.1.</span> <span class="nav-text">主要流程</span></a></li></ol></li></ol></div>
             
           </div>
         </section>
