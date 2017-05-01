@@ -258,6 +258,122 @@
             
               
                 
+                <a class="post-title-link" href="/2016/07/29/HBase-MVCC/" itemprop="url">
+                  HBase MVCC
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-07-29T15:49:19+08:00" content="2016-07-29">
+              2016-07-29
+            </time>
+          </span>
+
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="为什么需要MVCC"><a href="#为什么需要MVCC" class="headerlink" title="为什么需要MVCC?"></a>为什么需要MVCC?</h2><p>简单来说就是为了<strong>提高性能</strong>。<br>HBase保证了行级别的ACID。考虑下面情况：  </p>
+<h3 id="Write-Write同步"><a href="#Write-Write同步" class="headerlink" title="Write-Write同步"></a>Write-Write同步</h3><p>假如有两个并发线程同时对HBase同一行进行写操作。我们可以采用排他锁的方式进行同步，流程如下：  </p>
+<ol>
+<li>获得行锁  </li>
+<li>写Write-Ahead-Log(WAL)  </li>
+<li>更新MemStore  </li>
+<li>释放锁  </li>
+</ol>
+<h3 id="Read-Write-同步"><a href="#Read-Write-同步" class="headerlink" title="Read-Write 同步"></a>Read-Write 同步</h3><p>对于写操作，我们可以通过获得排他锁的方式保证ACID。但是对于读操作呢？一种方式是读也需要获得排他锁，然而这样的话读写操作都需要先获得行级排他锁，使得<strong>读写操作都变慢了</strong>。<br>HBase使用Multiversion Concurrency Control(MVCC)来是读操作避免获得行锁。</p>
+<h2 id="HBase-MVCC"><a href="#HBase-MVCC" class="headerlink" title="HBase MVCC"></a>HBase MVCC</h2><p>HBase的MVCC是这样的:<br>写操作：  </p>
+<ol>
+<li>获得行锁，然后每个写操作赋予一个write number  </li>
+<li>每个写入的data cell都赋予这个write number<br>读操作  </li>
+<li>每个读操作都记录一个read timstamp,也叫read point  </li>
+<li>读的时候会进行比较，返回的data cell满足write number &lt;= read point。这样就不会读到读操作之后发生的写操作的数据了<br>所以整个写流程变成：  </li>
+<li>获得行锁  </li>
+<li>获得新的write number  </li>
+<li>写Write-Ahead-Log(WAL)  </li>
+<li>更新MemStore  </li>
+<li>结束write number</li>
+<li>释放行锁  </li>
+</ol>
+<h2 id="HBase实现"><a href="#HBase实现" class="headerlink" title="HBase实现"></a>HBase实现</h2><h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p>Apache HBase Internals: Locking and Multiversion COncurrency Control</p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
                 <a class="post-title-link" href="/2016/07/29/HBase重试机制/" itemprop="url">
                   HBase重试机制
                 </a>
@@ -1047,7 +1163,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">16</span>
+              <span class="site-state-item-count">17</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
