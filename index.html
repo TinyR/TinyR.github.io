@@ -258,6 +258,381 @@
             
               
                 
+                <a class="post-title-link" href="/2017/06/24/应用程序配置/" itemprop="url">
+                  应用程序配置
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2017-06-24T21:46:01+08:00" content="2017-06-24">
+              2017-06-24
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/后台开发/" itemprop="url" rel="index">
+                    <span itemprop="name">后台开发</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>&emsp;&emsp;应用程序离不开配置模块。数据库，日志等组件都需要进行配置。</p>
+<h2 id="配置信息来源"><a href="#配置信息来源" class="headerlink" title="配置信息来源"></a>配置信息来源</h2><ol>
+<li>命令行</li>
+<li>参数</li>
+<li>环境变量 </li>
+<li>配置文件 </li>
+<li>默认值 default</li>
+</ol>
+<p>&emsp;&emsp;组件本身配置的默认值处于最低优先级，应用程序在启动的时候，读取配置信息，将会覆盖默认值。配置信息可以通过配置文件，环境变量，命令行参数等读取。</p>
+<h2 id="配置管理"><a href="#配置管理" class="headerlink" title="配置管理"></a>配置管理</h2><h3 id="运行环境的区分"><a href="#运行环境的区分" class="headerlink" title="运行环境的区分"></a>运行环境的区分</h3><p>&emsp;&emsp;在不同的运行环境：生产环境(Production)、开发环境(Devlopment)、测试环境(Test)，应用程序需要读取不同的配置信息。</p>
+<p>&emsp;&emsp;可以设置机器的系统环境变量，应用程序编译运行时，通过检测当前<strong>系统环境变量</strong>来区分运行环境。</p>
+<h3 id="配置文件"><a href="#配置文件" class="headerlink" title="配置文件"></a>配置文件</h3><p>&emsp;&emsp;一种方案是将主要的配置信息集中存储在配置文件(比如：yaml,.properties)中，应用程序编译运行的时候读取配置文件，获取配置信息。</p>
+<ol>
+<li>根据环境变量检测当前运行的环境，生产环境(Production)、开发环境(Devlopment)、测试环境(Test)</li>
+<li>根据不同的运行环境读取不同的配置文件</li>
+</ol>
+<h4 id="保护生产环境的配置信息"><a href="#保护生产环境的配置信息" class="headerlink" title="保护生产环境的配置信息"></a>保护生产环境的配置信息</h4><p>&emsp;&emsp;生产环境的一些配置信息，不应该完全暴露给普通开发人员。可以将生产环境配置文件存放在专门的服务器上，只有生产环境的机器才能够访问。应用程序在生产环境运行时，通过HTTP或者其他方式读取配置服务器上的配置信息。</p>
+<h3 id="配置中心"><a href="#配置中心" class="headerlink" title="配置中心"></a>配置中心</h3><p>&emsp;&emsp;简单的配置文件能够满足部分应用程序的需求。但存在一些不足，需要一个配置中心：集中管理依赖的配置、提供web管理平台进行配置和查询、支持应用程序拉取配置信息、支持发布与订阅，当配置变更时主动通知应用程序。</p>
+<p>&emsp;&emsp;有一些开源的解决方案，比如：阿里的diamond，应用程序不仅可以在启动时从diamond获取相关的配置，而且可以在运行中对配置数据的变化进行感知并获取变化后的配置数据。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><p><a href="http://www.infoq.com/cn/articles/5-config-mgmt-best-practices" target="_blank" rel="external">配置管理的五项最佳实践</a><br><a href="http://jm.taobao.org/2012/04/17/diamond-1-intro/" target="_blank" rel="external">diamond</a></p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2017/05/15/go-example学习/" itemprop="url">
+                  go example学习
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2017-05-15T23:48:04+08:00" content="2017-05-15">
+              2017-05-15
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/go/" itemprop="url" rel="index">
+                    <span itemprop="name">go</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="Go-by-Example学习记录"><a href="#Go-by-Example学习记录" class="headerlink" title="Go by Example学习记录"></a>Go by Example学习记录</h1><p>&emsp;&emsp;这篇博客主要记录学习<a href="https://gobyexample.com/" target="_blank" rel="external">Go by Example</a>的一些想法。</p>
+<p>###基本语法</p>
+<ul>
+<li><a href="https://gobyexample.com/hello-world" target="_blank" rel="external">Hello World</a>:经典的Hello World的例子</li>
+<li><a href="https://gobyexample.com/values" target="_blank" rel="external">Values</a>:了解go中的一些值</li>
+<li><a href="https://gobyexample.com/variables" target="_blank" rel="external">Variables</a>:了解声明变量</li>
+<li><a href="https://gobyexample.com/constants" target="_blank" rel="external">Constants</a>:使用const关键词声明常量</li>
+<li><a href="https://gobyexample.com/for" target="_blank" rel="external">For</a>:for是go中唯一的loop结构</li>
+<li><a href="https://gobyexample.com/if-else" target="_blank" rel="external">If/Else</a>:If/Else语句</li>
+<li><a href="https://gobyexample.com/switch" target="_blank" rel="external">Switch</a>:使用switch来表达多个分支的条件语句，可以比较value，也可以比较type</li>
+</ul>
+<p>###基本数据结构</p>
+<ul>
+<li><a href="https://gobyexample.com/arrays" target="_blank" rel="external">Arrays</a>:数组，了解定义、初始化</li>
+<li><a href="https://gobyexample.com/slices" target="_blank" rel="external">Slices</a>:</li>
+</ul>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2017/05/08/Web后台开发记/" itemprop="url">
+                  Web后台开发记
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2017-05-08T23:18:09+08:00" content="2017-05-08">
+              2017-05-08
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/后台/" itemprop="url" rel="index">
+                    <span itemprop="name">后台</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <ol>
+<li>应用程序配置</li>
+</ol>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
                 <a class="post-title-link" href="/2017/05/01/基于Docker-Compose开发一个简单的Flask应用/" itemprop="url">
                   基于Docker Compose开发一个简单的Flask应用
                 </a>
@@ -1053,322 +1428,6 @@
 
 
     
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/07/29/HBase-Get流程/" itemprop="url">
-                  HBase Get流程
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-07-29T21:41:47+08:00" content="2016-07-29">
-              2016-07-29
-            </time>
-          </span>
-
-          
-
-          
-            
-          
-
-          
-
-          
-          
-
-          
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/07/29/HBase-Bloom-filter/" itemprop="url">
-                  HBase Bloom filter
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-07-29T15:55:48+08:00" content="2016-07-29">
-              2016-07-29
-            </time>
-          </span>
-
-          
-
-          
-            
-          
-
-          
-
-          
-          
-
-          
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/07/29/HBase-行锁设计与实现/" itemprop="url">
-                  HBase 行锁设计与实现
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-07-29T15:49:42+08:00" content="2016-07-29">
-              2016-07-29
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/HBase/" itemprop="url" rel="index">
-                    <span itemprop="name">HBase</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-
-          
-          
-
-          
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="HBase保证行级别的修改的原子性。"><a href="#HBase保证行级别的修改的原子性。" class="headerlink" title="HBase保证行级别的修改的原子性。"></a>HBase保证行级别的修改的原子性。</h2><h2 id="HBase行锁实现"><a href="#HBase行锁实现" class="headerlink" title="HBase行锁实现"></a>HBase行锁实现</h2><p>基于HBase 0.94<br>现版本已经有所变化</p>
-<h3 id="HRegion"><a href="#HRegion" class="headerlink" title="HRegion"></a>HRegion</h3><p><img src="https://github.com/TinyR/images/blob/master/HBase/HRegion_rowLock.PNG?raw=true" alt="HRegion rowLock"></p>
-<p>lockedRows:存放rowKey与rowlock的键值对。<br>lockIds:存放lock id与rowKey的键值对。<br>lockIdGenerator:用于生成lock id</p>
-<h3 id="获取锁"><a href="#获取锁" class="headerlink" title="获取锁"></a>获取锁</h3><p>　　obtainRowLock(final byte [] row) 调用 internalObtainRowLock(final HashedBytes rowKey, boolean waitForLock)</p>
-<h4 id="主要流程"><a href="#主要流程" class="headerlink" title="主要流程"></a>主要流程</h4><ol>
-<li>新建锁rowLatch</li>
-<li>循环，直到获得锁(除非!waitForLock)：rowLatch放入到lockedRows中，成功则表示获得锁，如果锁已经被其他线程获得，则重新尝试。</li>
-<li>如果获得锁成功，循环，直到生成未被使用的lock id</li>
-</ol>
-<h4 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">private</span> Integer <span class="title">internalObtainRowLock</span><span class="params">(<span class="keyword">final</span> HashedBytes rowKey, <span class="keyword">boolean</span> waitForLock)</span></span></div><div class="line">      <span class="keyword">throws</span> IOException &#123;</div><div class="line">    checkRow(rowKey.getBytes(), <span class="string">"row lock"</span>);</div><div class="line">    startRegionOperation();</div><div class="line">    <span class="keyword">try</span> &#123;</div><div class="line">		<span class="comment">// 1. 新建锁</span></div><div class="line">      CountDownLatch rowLatch = <span class="keyword">new</span> CountDownLatch(<span class="number">1</span>);</div><div class="line"></div><div class="line">      </div><div class="line">		<span class="comment">//循环，直到获得锁(除非!waitForLock)</span></div><div class="line">      <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</div><div class="line">        CountDownLatch existingLatch = lockedRows.putIfAbsent(rowKey, rowLatch);</div><div class="line">        <span class="keyword">if</span> (existingLatch == <span class="keyword">null</span>) &#123;</div><div class="line">          <span class="keyword">break</span>;</div><div class="line">        &#125; <span class="keyword">else</span> &#123;</div><div class="line">          <span class="comment">// row already locked</span></div><div class="line">          <span class="keyword">if</span> (!waitForLock) &#123;</div><div class="line">            <span class="keyword">return</span> <span class="keyword">null</span>;</div><div class="line">          &#125;</div><div class="line">          <span class="keyword">try</span> &#123;</div><div class="line">            <span class="keyword">if</span> (!existingLatch.await(<span class="keyword">this</span>.rowLockWaitDuration,</div><div class="line">                            TimeUnit.MILLISECONDS)) &#123;</div><div class="line">              <span class="keyword">throw</span> <span class="keyword">new</span> IOException(<span class="string">"Timed out on getting lock for row="</span> + rowKey);</div><div class="line">            &#125;</div><div class="line">          &#125; <span class="keyword">catch</span> (InterruptedException ie) &#123;</div><div class="line">            LOG.warn(<span class="string">"internalObtainRowLock interrupted for row="</span> + rowKey);</div><div class="line">            InterruptedIOException iie = <span class="keyword">new</span> InterruptedIOException();</div><div class="line">            iie.initCause(ie);</div><div class="line">            <span class="keyword">throw</span> iie;</div><div class="line">          &#125;</div><div class="line">        &#125;</div><div class="line">      &#125;</div><div class="line"></div><div class="line">      <span class="comment">// loop until we generate an unused lock id</span></div><div class="line">		<span class="comment">//循环，直到生成未被使用的lock id</span></div><div class="line">      <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</div><div class="line">        Integer lockId = lockIdGenerator.incrementAndGet();</div><div class="line">        HashedBytes existingRowKey = lockIds.putIfAbsent(lockId, rowKey);</div><div class="line">        <span class="keyword">if</span> (existingRowKey == <span class="keyword">null</span>) &#123;</div><div class="line">          <span class="keyword">return</span> lockId;</div><div class="line">        &#125; <span class="keyword">else</span> &#123;</div><div class="line">          <span class="comment">// lockId already in use, jump generator to a new spot</span></div><div class="line">          lockIdGenerator.set(rand.nextInt());</div><div class="line">        &#125;</div><div class="line">      &#125;</div><div class="line">    &#125; <span class="keyword">finally</span> &#123;</div><div class="line">      closeRegionOperation();</div><div class="line">    &#125;</div><div class="line">  &#125;</div></pre></td></tr></table></figure>
-<h3 id="释放锁"><a href="#释放锁" class="headerlink" title="释放锁"></a>释放锁</h3><p>releaseRowLock(final Integer lockId)</p>
-<h4 id="主要流程-1"><a href="#主要流程-1" class="headerlink" title="主要流程"></a>主要流程</h4><ol>
-<li>从lockids中删除lockid</li>
-<li>从lockedRows中删除rowLatch</li>
-<li>唤醒等待获得锁的其他线程</li>
-</ol>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line"> <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">releaseRowLock</span><span class="params">(<span class="keyword">final</span> Integer lockId)</span> </span>&#123;</div><div class="line">   <span class="keyword">if</span> (lockId == <span class="keyword">null</span>) <span class="keyword">return</span>; <span class="comment">// null lock id, do nothing</span></div><div class="line"><span class="comment">// 从lockids中删除lockid</span></div><div class="line">   HashedBytes rowKey = lockIds.remove(lockId);</div><div class="line">   <span class="keyword">if</span> (rowKey == <span class="keyword">null</span>) &#123;</div><div class="line">     LOG.warn(<span class="string">"Release unknown lockId: "</span> + lockId);</div><div class="line">     <span class="keyword">return</span>;</div><div class="line">   &#125;</div><div class="line"><span class="comment">// 从lockedRows中删除rowLatch</span></div><div class="line">   CountDownLatch rowLatch = lockedRows.remove(rowKey);</div><div class="line">   <span class="keyword">if</span> (rowLatch == <span class="keyword">null</span>) &#123;</div><div class="line">     LOG.error(<span class="string">"Releases row not locked, lockId: "</span> + lockId + <span class="string">" row: "</span></div><div class="line">         + rowKey);</div><div class="line">     <span class="keyword">return</span>;</div><div class="line">   &#125;</div><div class="line"><span class="comment">// 唤醒等待获得锁的其他线程</span></div><div class="line">   rowLatch.countDown();</div><div class="line"> &#125;</div></pre></td></tr></table></figure>
-<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p>HBase-0.94.27源码</p>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
   </section>
 
   
@@ -1414,7 +1473,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">17</span>
+              <span class="site-state-item-count">20</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -1422,7 +1481,7 @@
           
             <div class="site-state-item site-state-categories">
               <a href="/categories">
-                <span class="site-state-item-count">4</span>
+                <span class="site-state-item-count">7</span>
                 <span class="site-state-item-name">分类</span>
               </a>
             </div>
@@ -1431,7 +1490,7 @@
           
             <div class="site-state-item site-state-tags">
               <a href="/tags">
-                <span class="site-state-item-count">5</span>
+                <span class="site-state-item-count">7</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>

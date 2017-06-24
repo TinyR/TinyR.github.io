@@ -68,7 +68,7 @@
 <link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="HBase," />
+  <meta name="keywords" content="后台," />
 
 
 
@@ -84,18 +84,43 @@
 
 
 
-<meta name="description" content="架构图">
+<meta name="description" content="&amp;emsp;&amp;emsp;应用程序离不开配置模块。数据库，日志等组件都需要进行配置。
+配置信息来源
+命令行
+参数
+环境变量 
+配置文件 
+默认值 default
+
+&amp;emsp;&amp;emsp;组件本身配置的默认值处于最低优先级，应用程序在启动的时候，读取配置信息，将会覆盖默认值。配置信息可以通过配置文件，环境变量，命令行参数等读取。
+配置管理运行环境的区分&amp;emsp;&amp;emsp;在不同的运行环境：生产环">
 <meta property="og:type" content="article">
-<meta property="og:title" content="HBase总体架构">
-<meta property="og:url" content="http://yoursite.com/2016/07/24/HBase总体架构/index.html">
+<meta property="og:title" content="应用程序配置">
+<meta property="og:url" content="http://yoursite.com/2017/06/24/应用程序配置/index.html">
 <meta property="og:site_name" content="RNA">
-<meta property="og:description" content="架构图">
-<meta property="og:image" content="https://github.com/TinyR/images/blob/master/HBase/overview.png?raw=true">
-<meta property="og:updated_time" content="2016-07-25T14:58:15.645Z">
+<meta property="og:description" content="&amp;emsp;&amp;emsp;应用程序离不开配置模块。数据库，日志等组件都需要进行配置。
+配置信息来源
+命令行
+参数
+环境变量 
+配置文件 
+默认值 default
+
+&amp;emsp;&amp;emsp;组件本身配置的默认值处于最低优先级，应用程序在启动的时候，读取配置信息，将会覆盖默认值。配置信息可以通过配置文件，环境变量，命令行参数等读取。
+配置管理运行环境的区分&amp;emsp;&amp;emsp;在不同的运行环境：生产环">
+<meta property="og:updated_time" content="2017-06-24T16:23:30.006Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="HBase总体架构">
-<meta name="twitter:description" content="架构图">
-<meta name="twitter:image" content="https://github.com/TinyR/images/blob/master/HBase/overview.png?raw=true">
+<meta name="twitter:title" content="应用程序配置">
+<meta name="twitter:description" content="&amp;emsp;&amp;emsp;应用程序离不开配置模块。数据库，日志等组件都需要进行配置。
+配置信息来源
+命令行
+参数
+环境变量 
+配置文件 
+默认值 default
+
+&amp;emsp;&amp;emsp;组件本身配置的默认值处于最低优先级，应用程序在启动的时候，读取配置信息，将会覆盖默认值。配置信息可以通过配置文件，环境变量，命令行参数等读取。
+配置管理运行环境的区分&amp;emsp;&amp;emsp;在不同的运行环境：生产环">
 
 
 
@@ -116,9 +141,9 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2016/07/24/HBase总体架构/"/>
+  <link rel="canonical" href="http://yoursite.com/2017/06/24/应用程序配置/"/>
 
-  <title> HBase总体架构 | RNA </title>
+  <title> 应用程序配置 | RNA </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -258,7 +283,7 @@
             
             
               
-                HBase总体架构
+                应用程序配置
               
             
           </h1>
@@ -270,8 +295,8 @@
               <i class="fa fa-calendar-o"></i>
             </span>
             <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-07-24T15:01:21+08:00" content="2016-07-24">
-              2016-07-24
+            <time itemprop="dateCreated" datetime="2017-06-24T21:46:01+08:00" content="2017-06-24">
+              2017-06-24
             </time>
           </span>
 
@@ -284,20 +309,8 @@
               <span class="post-meta-item-text">分类于</span>
               
                 <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/HBase/" itemprop="url" rel="index">
-                    <span itemprop="name">HBase</span>
-                  </a>
-                </span>
-
-                
-                
-                  ， 
-                
-
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/HBase/HBase架构/" itemprop="url" rel="index">
-                    <span itemprop="name">HBase架构</span>
+                  <a href="/categories/后台开发/" itemprop="url" rel="index">
+                    <span itemprop="name">后台开发</span>
                   </a>
                 </span>
 
@@ -329,7 +342,26 @@
       
 
       
-        <h2 id="架构图"><a href="#架构图" class="headerlink" title="架构图"></a>架构图</h2><p><img src="https://github.com/TinyR/images/blob/master/HBase/overview.png?raw=true" alt="HBase架构图"></p>
+        <p>&emsp;&emsp;应用程序离不开配置模块。数据库，日志等组件都需要进行配置。</p>
+<h2 id="配置信息来源"><a href="#配置信息来源" class="headerlink" title="配置信息来源"></a>配置信息来源</h2><ol>
+<li>命令行</li>
+<li>参数</li>
+<li>环境变量 </li>
+<li>配置文件 </li>
+<li>默认值 default</li>
+</ol>
+<p>&emsp;&emsp;组件本身配置的默认值处于最低优先级，应用程序在启动的时候，读取配置信息，将会覆盖默认值。配置信息可以通过配置文件，环境变量，命令行参数等读取。</p>
+<h2 id="配置管理"><a href="#配置管理" class="headerlink" title="配置管理"></a>配置管理</h2><h3 id="运行环境的区分"><a href="#运行环境的区分" class="headerlink" title="运行环境的区分"></a>运行环境的区分</h3><p>&emsp;&emsp;在不同的运行环境：生产环境(Production)、开发环境(Devlopment)、测试环境(Test)，应用程序需要读取不同的配置信息。</p>
+<p>&emsp;&emsp;可以设置机器的系统环境变量，应用程序编译运行时，通过检测当前<strong>系统环境变量</strong>来区分运行环境。</p>
+<h3 id="配置文件"><a href="#配置文件" class="headerlink" title="配置文件"></a>配置文件</h3><p>&emsp;&emsp;一种方案是将主要的配置信息集中存储在配置文件(比如：yaml,.properties)中，应用程序编译运行的时候读取配置文件，获取配置信息。</p>
+<ol>
+<li>根据环境变量检测当前运行的环境，生产环境(Production)、开发环境(Devlopment)、测试环境(Test)</li>
+<li>根据不同的运行环境读取不同的配置文件</li>
+</ol>
+<h4 id="保护生产环境的配置信息"><a href="#保护生产环境的配置信息" class="headerlink" title="保护生产环境的配置信息"></a>保护生产环境的配置信息</h4><p>&emsp;&emsp;生产环境的一些配置信息，不应该完全暴露给普通开发人员。可以将生产环境配置文件存放在专门的服务器上，只有生产环境的机器才能够访问。应用程序在生产环境运行时，通过HTTP或者其他方式读取配置服务器上的配置信息。</p>
+<h3 id="配置中心"><a href="#配置中心" class="headerlink" title="配置中心"></a>配置中心</h3><p>&emsp;&emsp;简单的配置文件能够满足部分应用程序的需求。但存在一些不足，需要一个配置中心：集中管理依赖的配置、提供web管理平台进行配置和查询、支持应用程序拉取配置信息、支持发布与订阅，当配置变更时主动通知应用程序。</p>
+<p>&emsp;&emsp;有一些开源的解决方案，比如：阿里的diamond，应用程序不仅可以在启动时从diamond获取相关的配置，而且可以在运行中对配置数据的变化进行感知并获取变化后的配置数据。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><p><a href="http://www.infoq.com/cn/articles/5-config-mgmt-best-practices" target="_blank" rel="external">配置管理的五项最佳实践</a><br><a href="http://jm.taobao.org/2012/04/17/diamond-1-intro/" target="_blank" rel="external">diamond</a></p>
 
       
     </div>
@@ -352,7 +384,7 @@
       
         <div class="post-tags">
           
-            <a href="/tags/HBase/" rel="tag">#HBase</a>
+            <a href="/tags/后台/" rel="tag">#后台</a>
           
         </div>
       
@@ -361,17 +393,13 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2016/07/24/HBase概念视图与物理视图/" rel="next" title="HBase概念视图与物理视图">
-                <i class="fa fa-chevron-left"></i> HBase概念视图与物理视图
+              <a href="/2017/05/15/go-example学习/" rel="next" title="go example学习">
+                <i class="fa fa-chevron-left"></i> go example学习
               </a>
             
           </div>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2016/07/24/HBase-Region定位/" rel="prev" title="HBase Region定位">
-                HBase Region定位 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -485,7 +513,7 @@
               
             
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#架构图"><span class="nav-number">1.</span> <span class="nav-text">架构图</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#配置信息来源"><span class="nav-number">1.</span> <span class="nav-text">配置信息来源</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#配置管理"><span class="nav-number">2.</span> <span class="nav-text">配置管理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#运行环境的区分"><span class="nav-number">2.1.</span> <span class="nav-text">运行环境的区分</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置文件"><span class="nav-number">2.2.</span> <span class="nav-text">配置文件</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#保护生产环境的配置信息"><span class="nav-number">2.2.1.</span> <span class="nav-text">保护生产环境的配置信息</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置中心"><span class="nav-number">2.3.</span> <span class="nav-text">配置中心</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考资料"><span class="nav-number">3.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
             
           </div>
         </section>
