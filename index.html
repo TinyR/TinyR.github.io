@@ -258,6 +258,259 @@
             
               
                 
+                <a class="post-title-link" href="/2017/07/22/Rate-Limiting/" itemprop="url">
+                  Rate Limiting
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2017-07-22T18:15:10+08:00" content="2017-07-22">
+              2017-07-22
+            </time>
+          </span>
+
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>&emsp;&emsp;Rate limiting主要用来控制对资源的访问速率，维护服务的稳定性，有许多应用场景，比如：防止爆发式的请求增长冲垮系统，报警系统每秒产生多少个error触发报警。</p>
+<h2 id="限流"><a href="#限流" class="headerlink" title="限流"></a>限流</h2><p>&emsp;&emsp;限流模式一般有两种：控制速率和控制并发。</p>
+<p>&emsp;&emsp;控制速率指的是限制对于资源的访问速率。本文主要谈的是控制速率。</p>
+<p>&emsp;&emsp;控制并发，比如：Semaphore，限制的是访问资源的并发量，即允许多少个请求同时访问该资源。</p>
+<h2 id="基本算法"><a href="#基本算法" class="headerlink" title="基本算法"></a>基本算法</h2><h3 id="Leaky-bucket"><a href="#Leaky-bucket" class="headerlink" title="Leaky bucket"></a>Leaky bucket</h3><p>漏桶算法<br><img src="https://github.com/TinyR/images/blob/master/rate-limiter/leaky-bucket.jpg?raw=true" alt="Leaky bucket"></p>
+<ul>
+<li>一个固定容量的bucket</li>
+<li>bucket以一定的速度出水(leak)，系统处理请求</li>
+<li>bucket为空，表示没有请求</li>
+<li>水（请求）先进入到bucket里，满了（请求过多）则溢出</li>
+</ul>
+<p>漏桶算法能强行限制数据的传输速率。</p>
+<h4 id="leaky-bucket-algorithm-as-a-meter"><a href="#leaky-bucket-algorithm-as-a-meter" class="headerlink" title="leaky bucket algorithm as a meter"></a>leaky bucket algorithm as a meter</h4><blockquote>
+<p>“A counter associated with each user transmitting on a connection is incremented whenever the user sends a packet and is decremented periodically. If the counter exceeds a threshold upon being incremented, the network discards the packet. The user specifies the rate at which the counter is decremented (this determines the average bandwidth) and the value of the threshold (a measure of burstiness)”</p>
+</blockquote>
+<p>bucket是一个计数器(counter)或者变量(variable),counter用来检测是否达到了limit。</p>
+<ul>
+<li>counter增：请求、事件到达。等同于water进入bucket。当达到limit，不再增。</li>
+<li><p>counter减：以固定rate减。等同于water从bucket中leak。<br>&emsp;&emsp;可以被用来检测某个时间发送的速率，比如faults。</p>
+<h4 id="leaky-bucket-algorithm-as-a-queue"><a href="#leaky-bucket-algorithm-as-a-queue" class="headerlink" title="leaky bucket algorithm as a queue"></a>leaky bucket algorithm as a queue</h4><p>bucket用queue表示。</p>
+</li>
+<li><p>进入queue:请求、事件到达入队列。</p>
+</li>
+<li>离开queue:按照固定速率出队列。</li>
+</ul>
+<h3 id="Token-bucket"><a href="#Token-bucket" class="headerlink" title="Token bucket"></a>Token bucket</h3><p>&emsp;&emsp;令牌桶算法是网络流量整形（Traffic Shaping）和速率限制（Rate Limiting）中最常使用的一种算法</p>
+<p><img src="https://github.com/TinyR/images/blob/master/rate-limiter/token-bucket-lgorithm.jpg?raw=true" alt="Token bucket"></p>
+<p>&emsp;&emsp;假设我们限制每秒最多访问r次：</p>
+<ul>
+<li>系统每1/r秒向bucket中加入一个tocken</li>
+<li>bucket最多拥有b个tocken。当bucket满时，新的tocken将被丢弃</li>
+<li>每次请求需要向bucket申请一个tocken。bucket移除一个tocken给该请求，系统处理请求。如果bucket的tocken不足，则等待。</li>
+</ul>
+<h3 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h3><p>&emsp;&emsp;如果使用 Java 语言，可以直接使用Guava 的 RateLimiter，有两种实现SmoothRateLimiter 和 SmoothWarmingUp。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><p><a href="https://en.wikipedia.org/wiki/Rate_limiting" target="_blank" rel="external">Rate limiting</a></p>
+<p><a href="https://en.wikipedia.org/wiki/Token_bucket" target="_blank" rel="external">Token bucket</a></p>
+<p><a href="https://en.wikipedia.org/wiki/Leaky_bucket" target="_blank" rel="external">Leaky bucket</a></p>
+<p><a href="https://github.com/google/guava/blob/master/guava/src/com/google/common/util/concurrent/RateLimiter.java" target="_blank" rel="external">guava RateLimiter</a></p>
+<p><a href="https://github.com/google/guava/blob/v18.0/guava/src/com/google/common/util/concurrent/SmoothRateLimiter.java" target="_blank" rel="external">guava SmoothRateLimiter</a></p>
+<p><a href="https://gobyexample.com/rate-limiting" target="_blank" rel="external">Go by Example: Rate Limiting</a></p>
+<p><a href="https://stackoverflow.com/questions/667508/whats-a-good-rate-limiting-algorithm" target="_blank" rel="external">What’s a good rate limiting algorithm</a></p>
+<p><a href="https://blog.jamespan.me/2015/10/19/traffic-shaping-with-token-bucket" target="_blank" rel="external">流量控制与令牌桶算法</a></p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2017/07/09/微服务学习/" itemprop="url">
+                  微服务学习
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2017-07-09T12:16:52+08:00" content="2017-07-09">
+              2017-07-09
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/微服务/" itemprop="url" rel="index">
+                    <span itemprop="name">微服务</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>&emsp;&emsp;工作以后，开始接触到微服务。在实际的开发中，也确实感受到了微服务带来的一些便利。</p>
+<h2 id="微服务"><a href="#微服务" class="headerlink" title="微服务"></a>微服务</h2><h3 id="单体应用"><a href="#单体应用" class="headerlink" title="单体应用"></a>单体应用</h3><p>&emsp;&emsp;工作前也做过一些项目。虽然开发的时候将这些应用分成好几个模块，但是整个应用整体打包和部署</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ol>
+<li>Martin Fowler博客：<a href="https://martinfowler.com/articles/microservices.html" target="_blank" rel="external">Microservices</a></li>
+<li>Microservices: From Design to Deployment</li>
+</ol>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
                 <a class="post-title-link" href="/2017/06/24/应用程序配置/" itemprop="url">
                   应用程序配置
                 </a>
@@ -1208,230 +1461,11 @@
 
 
     
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/07/30/HBase-数据写入server端分析/" itemprop="url">
-                  HBase 数据写入server端分析
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-07-30T12:07:02+08:00" content="2016-07-30">
-              2016-07-30
-            </time>
-          </span>
-
-          
-
-          
-            
-          
-
-          
-
-          
-          
-
-          
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="HBase批量处理操作"><a href="#HBase批量处理操作" class="headerlink" title="HBase批量处理操作"></a>HBase批量处理操作</h2><p>HBase client端批处理操作，最终通过RPC,远程调用HRegionServer的multi方法。</p>
-<h2 id="HRegionServer-multi-MultiAction-multi-方法"><a href="#HRegionServer-multi-MultiAction-multi-方法" class="headerlink" title="HRegionServer multi(MultiAction multi)方法"></a>HRegionServer multi(MultiAction<r> multi)方法</r></h2><h3 id="主要流程："><a href="#主要流程：" class="headerlink" title="主要流程："></a>主要流程：</h3><ol>
-<li>对每个Region下面的action进行排序</li>
-<li>对action进行分类，delete与put放一起，最终将会调用HRegion的batchMutate方法</li>
-<li>其他操作比如：get,append调用其他方法</li>
-</ol>
-<h2 id="HRegion-batchMutate方法"><a href="#HRegion-batchMutate方法" class="headerlink" title="HRegion batchMutate方法"></a>HRegion batchMutate方法</h2><p>将会调用doMiniBatchMutation方法</p>
-<h2 id="HRegion-doMiniBatchMutation方法"><a href="#HRegion-doMiniBatchMutation方法" class="headerlink" title="HRegion doMiniBatchMutation方法"></a>HRegion doMiniBatchMutation方法</h2><h3 id="主要流程"><a href="#主要流程" class="headerlink" title="主要流程"></a>主要流程</h3><ol>
-<li>获得尽可能多的行锁，且至少一个。</li>
-<li>更新delete/put操作所对应keyvalue的timestamps为最新。获得最新的mvcc number作为write number.</li>
-<li>写memstore</li>
-<li>构建 WAL edit</li>
-<li>向WAL添加edit但不sync wal.</li>
-<li>释放行锁</li>
-<li>sync wal</li>
-<li>更新mvcc。</li>
-</ol>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/07/30/HBase-Put操作client端分析/" itemprop="url">
-                  HBase Put操作client端分析
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-07-30T12:03:18+08:00" content="2016-07-30">
-              2016-07-30
-            </time>
-          </span>
-
-          
-
-          
-            
-          
-
-          
-
-          
-          
-
-          
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="HTable-Put"><a href="#HTable-Put" class="headerlink" title="HTable Put"></a>HTable Put</h2><p>void put(Put put)：单个Put操作，单行。<br>void put(List<put> puts):多个Put操作一起发送给服务器端。<br>void doPut(Put put):将Put操作放入缓冲区，并判断缓冲区是否满。<br>flushCommits():执行RPC，将缓冲区内的put操作发到服务器端。<br>void validatePut(final Put put):检查Put有效性  </put></p>
-<h3 id="写缓冲区"><a href="#写缓冲区" class="headerlink" title="写缓冲区"></a>写缓冲区</h3><p>ArrayList<put> writeBuffer:写缓冲区<br>autoFlush:默认为true，每次调用put方法，最后都会自动调用flushCommits。可通过调用setAutoFlush(boolean autoFlush)进行设置。<br>writeBufferSize:缓冲区大小，超过这个值，便会调用flushCommits向服务器端提交。可通过”hbase.client.write.buffer”进行配置<br>currentWriteBufferSize:当前缓冲区大小</put></p>
-<h3 id="源码分析"><a href="#源码分析" class="headerlink" title="源码分析"></a>源码分析</h3><h4 id="doPut方法"><a href="#doPut方法" class="headerlink" title="doPut方法"></a>doPut方法</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">doPut</span><span class="params">(Put put)</span> <span class="keyword">throws</span> IOException</span>&#123;</div><div class="line">  validatePut(put);</div><div class="line">  writeBuffer.add(put);</div><div class="line">  currentWriteBufferSize += put.heapSize();</div><div class="line">  <span class="keyword">if</span> (currentWriteBufferSize &gt; writeBufferSize) &#123;</div><div class="line">    flushCommits();</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<h5 id="主要流程："><a href="#主要流程：" class="headerlink" title="主要流程："></a>主要流程：</h5><ol>
-<li>Put有效性验证</li>
-<li>放入writeBuffer中</li>
-<li>判断缓冲区是否满，若满，则向服务器提交</li>
-</ol>
-<h4 id="put-Put-put-方法"><a href="#put-Put-put-方法" class="headerlink" title="put(Put put)方法"></a>put(Put put)方法</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">put</span><span class="params">(<span class="keyword">final</span> Put put)</span> <span class="keyword">throws</span> IOException </span>&#123;</div><div class="line">  doPut(put);</div><div class="line">  <span class="keyword">if</span> (autoFlush) &#123;</div><div class="line">    flushCommits();</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<h5 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h5><p>　　每次先调用doPut放入缓冲区，再判断autoFlush，autoFlush默认为true，则每次flushCommits都只向服务器提交一个Put操作。</p>
-<h4 id="put-final-List-puts-方法"><a href="#put-final-List-puts-方法" class="headerlink" title="put(final List puts)方法"></a>put(final List<put> puts)方法</put></h4><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">put</span><span class="params">(<span class="keyword">final</span> List&lt;Put&gt; puts)</span> <span class="keyword">throws</span> IOException </span>&#123;</div><div class="line">  <span class="keyword">for</span> (Put put : puts) &#123;</div><div class="line">    doPut(put);</div><div class="line">  &#125;</div><div class="line">  <span class="keyword">if</span> (autoFlush) &#123;</div><div class="line">    flushCommits();</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<h5 id="分析-1"><a href="#分析-1" class="headerlink" title="分析"></a>分析</h5><ol>
-<li>将所有Put操作都放入到writeBuffer中</li>
-<li>判断是否autoFlush<br>利用到了writeBuffer</li>
-</ol>
-<h4 id="flushCommits"><a href="#flushCommits" class="headerlink" title="flushCommits()"></a>flushCommits()</h4><p>调用HConnection的<strong>processBatch</strong>(writeBuffer, tableName, pool, results)方法进行批处理，获得results。<br>关于processBatch的分析，可参考另一篇笔记: HBase Client端批量处理操作分析</p>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
   </section>
 
   
   <nav class="pagination">
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right"></i></a>
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right"></i></a>
   </nav>
 
 
@@ -1472,7 +1506,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">20</span>
+              <span class="site-state-item-count">22</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -1480,7 +1514,7 @@
           
             <div class="site-state-item site-state-categories">
               <a href="/categories">
-                <span class="site-state-item-count">7</span>
+                <span class="site-state-item-count">8</span>
                 <span class="site-state-item-name">分类</span>
               </a>
             </div>
@@ -1489,7 +1523,7 @@
           
             <div class="site-state-item site-state-tags">
               <a href="/tags">
-                <span class="site-state-item-count">7</span>
+                <span class="site-state-item-count">8</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>

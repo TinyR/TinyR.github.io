@@ -68,7 +68,7 @@
 <link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="HBase," />
+  <meta name="keywords" content="Hexo, NexT" />
 
 
 
@@ -84,35 +84,28 @@
 
 
 
-<meta name="description" content="建议先看上一篇：HBase数据模型  
-采用HBase官方文档的示例。  
-概念视图:表webtable:  
-物理视图：anchor列族:
-contents列族：   
-参考：HBase官方文档，Data Model部分">
+<meta name="description" content="&amp;emsp;&amp;emsp;Rate limiting主要用来控制对资源的访问速率，维护服务的稳定性，有许多应用场景，比如：防止爆发式的请求增长冲垮系统，报警系统每秒产生多少个error触发报警。
+限流&amp;emsp;&amp;emsp;限流模式一般有两种：控制速率和控制并发。
+&amp;emsp;&amp;emsp;控制速率指的是限制对于资源的访问速率。本文主要谈的是控制速率。
+&amp;emsp;&amp;emsp;控制并发，比如：Sema">
 <meta property="og:type" content="article">
-<meta property="og:title" content="HBase概念视图与物理视图">
-<meta property="og:url" content="http://yoursite.com/2016/07/24/HBase概念视图与物理视图/index.html">
+<meta property="og:title" content="Rate Limiting">
+<meta property="og:url" content="http://yoursite.com/2017/07/22/Rate-Limiting/index.html">
 <meta property="og:site_name" content="RNA">
-<meta property="og:description" content="建议先看上一篇：HBase数据模型  
-采用HBase官方文档的示例。  
-概念视图:表webtable:  
-物理视图：anchor列族:
-contents列族：   
-参考：HBase官方文档，Data Model部分">
-<meta property="og:image" content="https://github.com/TinyR/images/blob/master/HBase/conceptual-view.PNG?raw=true">
-<meta property="og:image" content="https://github.com/TinyR/images/blob/master/HBase/anchor.PNG?raw=true">
-<meta property="og:image" content="https://github.com/TinyR/images/blob/master/HBase/contents.PNG?raw=true">
-<meta property="og:updated_time" content="2016-07-25T16:22:13.124Z">
+<meta property="og:description" content="&amp;emsp;&amp;emsp;Rate limiting主要用来控制对资源的访问速率，维护服务的稳定性，有许多应用场景，比如：防止爆发式的请求增长冲垮系统，报警系统每秒产生多少个error触发报警。
+限流&amp;emsp;&amp;emsp;限流模式一般有两种：控制速率和控制并发。
+&amp;emsp;&amp;emsp;控制速率指的是限制对于资源的访问速率。本文主要谈的是控制速率。
+&amp;emsp;&amp;emsp;控制并发，比如：Sema">
+<meta property="og:image" content="https://github.com/TinyR/images/blob/master/rate-limiter/leaky-bucket.jpg?raw=true">
+<meta property="og:image" content="https://github.com/TinyR/images/blob/master/rate-limiter/token-bucket-lgorithm.jpg?raw=true">
+<meta property="og:updated_time" content="2017-07-22T15:05:19.314Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="HBase概念视图与物理视图">
-<meta name="twitter:description" content="建议先看上一篇：HBase数据模型  
-采用HBase官方文档的示例。  
-概念视图:表webtable:  
-物理视图：anchor列族:
-contents列族：   
-参考：HBase官方文档，Data Model部分">
-<meta name="twitter:image" content="https://github.com/TinyR/images/blob/master/HBase/conceptual-view.PNG?raw=true">
+<meta name="twitter:title" content="Rate Limiting">
+<meta name="twitter:description" content="&amp;emsp;&amp;emsp;Rate limiting主要用来控制对资源的访问速率，维护服务的稳定性，有许多应用场景，比如：防止爆发式的请求增长冲垮系统，报警系统每秒产生多少个error触发报警。
+限流&amp;emsp;&amp;emsp;限流模式一般有两种：控制速率和控制并发。
+&amp;emsp;&amp;emsp;控制速率指的是限制对于资源的访问速率。本文主要谈的是控制速率。
+&amp;emsp;&amp;emsp;控制并发，比如：Sema">
+<meta name="twitter:image" content="https://github.com/TinyR/images/blob/master/rate-limiter/leaky-bucket.jpg?raw=true">
 
 
 
@@ -133,9 +126,9 @@ contents列族：
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2016/07/24/HBase概念视图与物理视图/"/>
+  <link rel="canonical" href="http://yoursite.com/2017/07/22/Rate-Limiting/"/>
 
-  <title> HBase概念视图与物理视图 | RNA </title>
+  <title> Rate Limiting | RNA </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -275,7 +268,7 @@ contents列族：
             
             
               
-                HBase概念视图与物理视图
+                Rate Limiting
               
             
           </h1>
@@ -287,30 +280,11 @@ contents列族：
               <i class="fa fa-calendar-o"></i>
             </span>
             <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-07-24T14:34:27+08:00" content="2016-07-24">
-              2016-07-24
+            <time itemprop="dateCreated" datetime="2017-07-22T18:15:10+08:00" content="2017-07-22">
+              2017-07-22
             </time>
           </span>
 
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/HBase/" itemprop="url" rel="index">
-                    <span itemprop="name">HBase</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
           
 
           
@@ -334,12 +308,48 @@ contents列族：
       
 
       
-        <p>建议先看上一篇：HBase数据模型  </p>
-<p>采用HBase官方文档的示例。  </p>
-<h2 id="概念视图"><a href="#概念视图" class="headerlink" title="概念视图:"></a>概念视图:</h2><p>表webtable:<br><img src="https://github.com/TinyR/images/blob/master/HBase/conceptual-view.PNG?raw=true" alt="HBase概念视图">  </p>
-<h2 id="物理视图："><a href="#物理视图：" class="headerlink" title="物理视图："></a>物理视图：</h2><p>anchor列族:<br><img src="https://github.com/TinyR/images/blob/master/HBase/anchor.PNG?raw=true" alt="anchor列族"></p>
-<p>contents列族：<br><img src="https://github.com/TinyR/images/blob/master/HBase/contents.PNG?raw=true" alt="contents列族">   </p>
-<p>参考：<br><a href="http://hbase.apache.org/book.html#datamodel" target="_blank" rel="external">HBase官方文档，Data Model部分</a></p>
+        <p>&emsp;&emsp;Rate limiting主要用来控制对资源的访问速率，维护服务的稳定性，有许多应用场景，比如：防止爆发式的请求增长冲垮系统，报警系统每秒产生多少个error触发报警。</p>
+<h2 id="限流"><a href="#限流" class="headerlink" title="限流"></a>限流</h2><p>&emsp;&emsp;限流模式一般有两种：控制速率和控制并发。</p>
+<p>&emsp;&emsp;控制速率指的是限制对于资源的访问速率。本文主要谈的是控制速率。</p>
+<p>&emsp;&emsp;控制并发，比如：Semaphore，限制的是访问资源的并发量，即允许多少个请求同时访问该资源。</p>
+<h2 id="基本算法"><a href="#基本算法" class="headerlink" title="基本算法"></a>基本算法</h2><h3 id="Leaky-bucket"><a href="#Leaky-bucket" class="headerlink" title="Leaky bucket"></a>Leaky bucket</h3><p>漏桶算法<br><img src="https://github.com/TinyR/images/blob/master/rate-limiter/leaky-bucket.jpg?raw=true" alt="Leaky bucket"></p>
+<ul>
+<li>一个固定容量的bucket</li>
+<li>bucket以一定的速度出水(leak)，系统处理请求</li>
+<li>bucket为空，表示没有请求</li>
+<li>水（请求）先进入到bucket里，满了（请求过多）则溢出</li>
+</ul>
+<p>漏桶算法能强行限制数据的传输速率。</p>
+<h4 id="leaky-bucket-algorithm-as-a-meter"><a href="#leaky-bucket-algorithm-as-a-meter" class="headerlink" title="leaky bucket algorithm as a meter"></a>leaky bucket algorithm as a meter</h4><blockquote>
+<p>“A counter associated with each user transmitting on a connection is incremented whenever the user sends a packet and is decremented periodically. If the counter exceeds a threshold upon being incremented, the network discards the packet. The user specifies the rate at which the counter is decremented (this determines the average bandwidth) and the value of the threshold (a measure of burstiness)”</p>
+</blockquote>
+<p>bucket是一个计数器(counter)或者变量(variable),counter用来检测是否达到了limit。</p>
+<ul>
+<li>counter增：请求、事件到达。等同于water进入bucket。当达到limit，不再增。</li>
+<li><p>counter减：以固定rate减。等同于water从bucket中leak。<br>&emsp;&emsp;可以被用来检测某个时间发送的速率，比如faults。</p>
+<h4 id="leaky-bucket-algorithm-as-a-queue"><a href="#leaky-bucket-algorithm-as-a-queue" class="headerlink" title="leaky bucket algorithm as a queue"></a>leaky bucket algorithm as a queue</h4><p>bucket用queue表示。</p>
+</li>
+<li><p>进入queue:请求、事件到达入队列。</p>
+</li>
+<li>离开queue:按照固定速率出队列。</li>
+</ul>
+<h3 id="Token-bucket"><a href="#Token-bucket" class="headerlink" title="Token bucket"></a>Token bucket</h3><p>&emsp;&emsp;令牌桶算法是网络流量整形（Traffic Shaping）和速率限制（Rate Limiting）中最常使用的一种算法</p>
+<p><img src="https://github.com/TinyR/images/blob/master/rate-limiter/token-bucket-lgorithm.jpg?raw=true" alt="Token bucket"></p>
+<p>&emsp;&emsp;假设我们限制每秒最多访问r次：</p>
+<ul>
+<li>系统每1/r秒向bucket中加入一个tocken</li>
+<li>bucket最多拥有b个tocken。当bucket满时，新的tocken将被丢弃</li>
+<li>每次请求需要向bucket申请一个tocken。bucket移除一个tocken给该请求，系统处理请求。如果bucket的tocken不足，则等待。</li>
+</ul>
+<h3 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h3><p>&emsp;&emsp;如果使用 Java 语言，可以直接使用Guava 的 RateLimiter，有两种实现SmoothRateLimiter 和 SmoothWarmingUp。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><p><a href="https://en.wikipedia.org/wiki/Rate_limiting" target="_blank" rel="external">Rate limiting</a></p>
+<p><a href="https://en.wikipedia.org/wiki/Token_bucket" target="_blank" rel="external">Token bucket</a></p>
+<p><a href="https://en.wikipedia.org/wiki/Leaky_bucket" target="_blank" rel="external">Leaky bucket</a></p>
+<p><a href="https://github.com/google/guava/blob/master/guava/src/com/google/common/util/concurrent/RateLimiter.java" target="_blank" rel="external">guava RateLimiter</a></p>
+<p><a href="https://github.com/google/guava/blob/v18.0/guava/src/com/google/common/util/concurrent/SmoothRateLimiter.java" target="_blank" rel="external">guava SmoothRateLimiter</a></p>
+<p><a href="https://gobyexample.com/rate-limiting" target="_blank" rel="external">Go by Example: Rate Limiting</a></p>
+<p><a href="https://stackoverflow.com/questions/667508/whats-a-good-rate-limiting-algorithm" target="_blank" rel="external">What’s a good rate limiting algorithm</a></p>
+<p><a href="https://blog.jamespan.me/2015/10/19/traffic-shaping-with-token-bucket" target="_blank" rel="external">流量控制与令牌桶算法</a></p>
 
       
     </div>
@@ -360,28 +370,18 @@ contents列族：
 
     <footer class="post-footer">
       
-        <div class="post-tags">
-          
-            <a href="/tags/HBase/" rel="tag">#HBase</a>
-          
-        </div>
-      
 
       
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2016/07/24/HBase数据模型/" rel="next" title="HBase数据模型">
-                <i class="fa fa-chevron-left"></i> HBase数据模型
+              <a href="/2017/07/09/微服务学习/" rel="next" title="微服务学习">
+                <i class="fa fa-chevron-left"></i> 微服务学习
               </a>
             
           </div>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2016/07/24/HBase总体架构/" rel="prev" title="HBase总体架构">
-                HBase总体架构 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -495,7 +495,7 @@ contents列族：
               
             
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#概念视图"><span class="nav-number">1.</span> <span class="nav-text">概念视图:</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#物理视图："><span class="nav-number">2.</span> <span class="nav-text">物理视图：</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#限流"><span class="nav-number">1.</span> <span class="nav-text">限流</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#基本算法"><span class="nav-number">2.</span> <span class="nav-text">基本算法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Leaky-bucket"><span class="nav-number">2.1.</span> <span class="nav-text">Leaky bucket</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#leaky-bucket-algorithm-as-a-meter"><span class="nav-number">2.1.1.</span> <span class="nav-text">leaky bucket algorithm as a meter</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#leaky-bucket-algorithm-as-a-queue"><span class="nav-number">2.1.2.</span> <span class="nav-text">leaky bucket algorithm as a queue</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Token-bucket"><span class="nav-number">2.2.</span> <span class="nav-text">Token bucket</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#实现"><span class="nav-number">2.3.</span> <span class="nav-text">实现</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考资料"><span class="nav-number">3.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
             
           </div>
         </section>
